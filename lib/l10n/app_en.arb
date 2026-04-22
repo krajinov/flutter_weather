@@ -1,0 +1,43 @@
+{
+  "appTitle": "Flutter Weather App",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "home": "HOME",
+  "map": "MAP",
+  "alerts": "ALERTS",
+  "settings": "SETTINGS",
+  "retry": "Retry",
+  "weatherAlerts": "Weather Alerts",
+  "errorLoadingWeather": "Error loading weather",
+  "errorLoadingAlerts": "Error loading alerts",
+  "errorLoadingLocation": "Error loading location",
+  "noAlerts": "No alerts right now",
+  "today": "Today",
+  "feelsLike": "Feels Like",
+  "humidity": "Humidity",
+  "windSpeed": "Wind Speed",
+  "hourlyForecast": "Hourly Forecast",
+  "next3Days": "Next 3 Days",
+  "rain": "Rain",
+  "temperature": "Temperature",
+  "wind": "Wind",
+  "currentLocation": "Current Location",
+  "addCity": "Add City",
+  "temperatureUnit": "Temperature Unit",
+  "rainAlerts": "Rain Alerts",
+  "severeWeatherAlerts": "Severe Weather Alerts",
+  "darkMode": "Dark Mode",
+  "locationDisabled": "Location services are disabled.",
+  "locationDenied": "Location permissions are denied",
+  "locationPermanentlyDenied": "Location permissions are permanently denied, we cannot request permissions.",
+  "unknownCity": "Unknown City",
+  "tempCelsius": "{temp} °C",
+  "@tempCelsius": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  }
+}

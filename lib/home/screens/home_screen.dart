@@ -12,6 +12,7 @@ import '../widgets/daily_forecast_list.dart';
 import '../widgets/hourly_forecast_list.dart';
 import '../widgets/quick_stats_grid.dart';
 import '../widgets/weather_header.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -55,22 +56,22 @@ class _HomeScreenState extends State<HomeScreen> {
           unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(LucideIcons.home),
-              label: 'HOME',
+              icon: const Icon(LucideIcons.home),
+              label: AppLocalizations.of(context)!.home,
             ),
             BottomNavigationBarItem(
-              icon: Icon(LucideIcons.mapPin),
-              label: 'MAP',
+              icon: const Icon(LucideIcons.mapPin),
+              label: AppLocalizations.of(context)!.map,
             ),
             BottomNavigationBarItem(
-              icon: Icon(LucideIcons.bell),
-              label: 'ALERTS',
+              icon: const Icon(LucideIcons.bell),
+              label: AppLocalizations.of(context)!.alerts,
             ),
             BottomNavigationBarItem(
-              icon: Icon(LucideIcons.settings),
-              label: 'SETTINGS',
+              icon: const Icon(LucideIcons.settings),
+              label: AppLocalizations.of(context)!.settings,
             ),
           ],
         ),
@@ -118,14 +119,14 @@ class _HomeContent extends ConsumerWidget {
                 const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'Error loading weather\n${error.toString()}',
+                  '${AppLocalizations.of(context)!.errorLoadingWeather}\n${error.toString()}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref.refresh(weatherProvider.future),
-                  child: const Text('Retry'),
+                  child: Text(AppLocalizations.of(context)!.retry),
                 )
               ],
             ),

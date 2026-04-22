@@ -12,6 +12,7 @@ import '../../home/providers/weather_provider.dart';
 import '../widgets/layer_toggles.dart';
 import '../widgets/map_overlay_widgets.dart';
 import '../widgets/map_weather_card.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -122,7 +123,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               child: CircularProgressIndicator(color: AppColors.statusIconActive),
             ),
             error: (error, stack) => Center(
-              child: Text('Error loading location: $error', style: const TextStyle(color: Colors.white)),
+              child: Text('${AppLocalizations.of(context)!.errorLoadingLocation}: $error', style: const TextStyle(color: Colors.white)),
             ),
           );
         },
@@ -138,14 +139,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'Error loading weather\n${error.toString()}',
+                  '${AppLocalizations.of(context)!.errorLoadingWeather}\n${error.toString()}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref.refresh(weatherProvider.future),
-                  child: const Text('Retry'),
+                  child: Text(AppLocalizations.of(context)!.retry),
                 )
               ],
             ),

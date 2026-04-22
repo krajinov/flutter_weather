@@ -4,6 +4,7 @@ import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../models/weather_data.dart';
 import 'glass_card.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class HourlyForecastList extends StatelessWidget {
   final List<HourlyForecast> forecasts;
@@ -16,7 +17,7 @@ class HourlyForecastList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hourly Forecast',
+          AppLocalizations.of(context)!.hourlyForecast,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -45,7 +46,7 @@ class HourlyForecastList extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${forecast.temperature} C',
+                      AppLocalizations.of(context)!.tempCelsius(forecast.temperature.toString()),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),

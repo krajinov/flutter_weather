@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class LayerToggles extends StatelessWidget {
   final int activeLayer;
@@ -13,7 +14,8 @@ class LayerToggles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final layers = ['Rain', 'Temperature', 'Wind'];
+    final l10n = AppLocalizations.of(context)!;
+    final layers = [l10n.rain, l10n.temperature, l10n.wind];
 
     return Row(
       children: List.generate(layers.length, (index) {

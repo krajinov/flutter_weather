@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import '../../core/utils/mock_data.dart';
 import '../models/weather_data.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class WeatherHeader extends StatelessWidget {
   final WeatherData data;
@@ -20,7 +21,7 @@ class WeatherHeader extends StatelessWidget {
           style: theme.bodyMedium,
         ),
         Text(
-          '${data.temperature} C',
+          AppLocalizations.of(context)!.tempCelsius(data.temperature.toString()),
           style: theme.displayLarge,
         ),
         Text(
