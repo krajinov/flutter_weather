@@ -6,14 +6,20 @@ import 'package:intl/intl.dart';
 import '../../home/models/weather_data.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class BottomWeatherSheet extends StatelessWidget {
+class PremiumWeatherSheet extends StatelessWidget {
   final WeatherData weatherData;
+  final DraggableScrollableController? controller;
 
-  const BottomWeatherSheet({super.key, required this.weatherData});
+  const PremiumWeatherSheet({
+    super.key, 
+    required this.weatherData,
+    this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
+      controller: controller,
       initialChildSize: 0.15,
       minChildSize: 0.15,
       maxChildSize: 0.85,

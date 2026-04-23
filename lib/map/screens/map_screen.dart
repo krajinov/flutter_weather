@@ -1,10 +1,8 @@
-import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
@@ -14,6 +12,7 @@ import '../../home/providers/weather_provider.dart';
 import '../widgets/layer_toggles.dart';
 import '../widgets/map_overlay_widgets.dart';
 import '../widgets/bottom_weather_sheet.dart';
+import '../widgets/floating_search_bar.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 import '../../core/utils/preview_helper.dart';
 
@@ -25,103 +24,59 @@ class MapScreen extends ConsumerStatefulWidget {
 }
 
 class _MapScreenState extends ConsumerState<MapScreen> {
-  int _activeLayer = 0;
+  int _activeLayer = -1; // -1 = no overlay active
   final MapController _mapController = MapController();
-  final TextEditingController _searchController = TextEditingController();
   final NominatimService _nominatimService = NominatimService();
-  final FocusNode _searchFocusNode = FocusNode();
-
-  List<PlaceSuggestion> _suggestions = [];
-  bool _isSearching = false;
-  bool _showSuggestions = false;
-  Timer? _debounceTimer;
+  final DraggableScrollableController _sheetController = DraggableScrollableController();
+  
+  double _sheetExtent = 0.15; // default min child size
 
   @override
   void initState() {
     super.initState();
-    _searchController.addListener(_onSearchChanged);
-    _searchFocusNode.addListener(() {
-      if (!_searchFocusNode.hasFocus) {
-        // Delay hiding so tap on suggestion registers first
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (mounted) setState(() => _showSuggestions = false);
-        });
-      }
-    });
+    _sheetController.addListener(_onSheetExtentChanged);
   }
 
-  void _onSearchChanged() {
-    final query = _searchController.text;
-
-    // Cancel any previous debounce timer
-    _debounceTimer?.cancel();
-
-    if (query.trim().length < 2) {
+  void _onSheetExtentChanged() {
+    if (_sheetController.isAttached) {
       setState(() {
-        _suggestions = [];
-        _showSuggestions = false;
-      });
-      return;
-    }
-
-    // Debounce: wait 400ms after user stops typing
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _fetchSuggestions(query);
-    });
-  }
-
-  Future<List<PlaceSuggestion>> _fetchSuggestions(String query) async {
-    if (!mounted) return [];
-    setState(() => _isSearching = true);
-
-    // Get current position for biasing results
-    final position = ref.read(locationProvider).asData?.value;
-
-    final results = await _nominatimService.searchPlaces(
-      query,
-      biasLat: position?.latitude,
-      biasLon: position?.longitude,
-    );
-
-    if (mounted) {
-      setState(() {
-        _suggestions = results;
-        _showSuggestions = results.isNotEmpty;
-        _isSearching = false;
+        _sheetExtent = _sheetController.size;
       });
     }
-    return results;
-  }
-
-  void _selectSuggestion(PlaceSuggestion suggestion) {
-    final newPoint = LatLng(suggestion.latitude, suggestion.longitude);
-    ref.read(selectedLocationProvider.notifier).updateLocation(newPoint);
-    _mapController.move(newPoint, 12.0);
-
-    setState(() {
-      _searchController.removeListener(_onSearchChanged);
-      _searchController.text = suggestion.displayName.split(',').first;
-      _searchController.addListener(_onSearchChanged);
-      _suggestions = [];
-      _showSuggestions = false;
-    });
-
-    _searchFocusNode.unfocus();
   }
 
   void _onMapTap(TapPosition tapPosition, LatLng point) {
     ref.read(selectedLocationProvider.notifier).updateLocation(point);
     _mapController.move(point, _mapController.camera.zoom);
-    setState(() => _showSuggestions = false);
-    _searchFocusNode.unfocus();
+  }
+
+  void _onSuggestionSelected(PlaceSuggestion suggestion) {
+    final newPoint = LatLng(suggestion.latitude, suggestion.longitude);
+    ref.read(selectedLocationProvider.notifier).updateLocation(newPoint);
+    _mapController.move(newPoint, 12.0);
+  }
+
+  void _onLayerChanged(int tapped) {
+    setState(() => _activeLayer = (_activeLayer == tapped) ? -1 : tapped);
+  }
+
+  static const _overlayLayers = [
+    'precipitation_new', // Radar
+    'temp_new',          // Temperature
+    'wind_new',          // Wind
+    'clouds_new',        // Clouds
+    'rain_new',          // Rainfall
+  ];
+
+  String _overlayUrlForLayer(int layer) {
+    final apiKey = dotenv.env['OPENWEATHER_API_KEY'] ?? '';
+    return 'https://tile.openweathermap.org/map/${_overlayLayers[layer]}/{z}/{x}/{y}.png?appid=$apiKey';
   }
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
-    _searchFocusNode.dispose();
+    _sheetController.removeListener(_onSheetExtentChanged);
+    _sheetController.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -139,10 +94,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           return locationAsyncValue.when(
             data: (position) {
               final latLng = selectedLocation ?? LatLng(position.latitude, position.longitude);
+              
+              // Calculate bottom offset for map layer chips
+              final screenHeight = MediaQuery.of(context).size.height;
+              final chipsBottomOffset = (screenHeight * _sheetExtent) + 16;
 
               return Stack(
                 children: [
-                  // Full screen map
+                  // 1. Full screen map
                   FlutterMap(
                     mapController: _mapController,
                     options: MapOptions(
@@ -155,6 +114,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName: 'com.example.flutter_weather',
                       ),
+                      // Weather overlay tile layer (only when a chip is active)
+                      if (_activeLayer != -1)
+                        Opacity(
+                          opacity: 0.7,
+                          child: TileLayer(
+                            urlTemplate: _overlayUrlForLayer(_activeLayer),
+                            userAgentPackageName: 'com.example.flutter_weather',
+                          ),
+                        ),
                       MarkerLayer(
                         markers: [
                           Marker(
@@ -168,175 +136,32 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ],
                   ),
 
-                  // Draggable Bottom Sheet (Rendered before overlays so overlays are on top)
-                  BottomWeatherSheet(weatherData: weatherData),
+                  // 2. Draggable Bottom Sheet
+                  PremiumWeatherSheet(
+                    weatherData: weatherData,
+                    controller: _sheetController,
+                  ),
 
-                  // Search Bar & Suggestions (Positioned at the top)
+                  // 3. Floating Map Layer Chips
+                  Positioned(
+                    bottom: chipsBottomOffset,
+                    left: 20,
+                    right: 20,
+                    child: MapLayerChips(
+                      activeLayer: _activeLayer,
+                      onLayerChanged: _onLayerChanged,
+                    ),
+                  ),
+
+                  // 4. Floating Search Bar
                   Positioned(
                     top: MediaQuery.of(context).padding.top + 16,
                     left: 20,
                     right: 20,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Search bar
-                        Container(
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: const Color(0xE00D1E30), // Increased opacity
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(color: const Color(0x337FA5C8)),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x40000000),
-                                blurRadius: 10,
-                                offset: Offset(0, 4),
-                              )
-                            ],
-                          ),
-                          child: TextField(
-                            controller: _searchController,
-                            focusNode: _searchFocusNode,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.searchCity,
-                              hintStyle: const TextStyle(color: Color(0xFFAFC2D3)),
-                              prefixIcon: const Icon(LucideIcons.search, color: Color(0xFF7CC4FF)),
-                              suffixIcon: _isSearching
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(14.0),
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7CC4FF)),
-                                    )
-                                  : _searchController.text.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(LucideIcons.x, color: Color(0xFF7CC4FF)),
-                                          onPressed: () {
-                                            _searchController.clear();
-                                            setState(() {
-                                              _suggestions = [];
-                                              _showSuggestions = false;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                            ),
-                          ),
-                        ),
-
-                        // Suggestions dropdown
-                        if (_showSuggestions && _suggestions.isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            constraints: const BoxConstraints(maxHeight: 400),
-                            decoration: BoxDecoration(
-                              color: const Color(0xF20D1E30), // Solider background
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0x337FA5C8)),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x60000000),
-                                  blurRadius: 20,
-                                  offset: Offset(0, 8),
-                                )
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: ListView.separated(
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                itemCount: _suggestions.length,
-                                separatorBuilder: (_, _) => Divider(
-                                  color: Colors.white.withValues(alpha: 0.08),
-                                  height: 1,
-                                  indent: 52,
-                                ),
-                                itemBuilder: (context, index) {
-                                  final suggestion = _suggestions[index];
-                                  final parts = suggestion.displayName.split(',');
-                                  final city = parts.first.trim();
-                                  final region = parts.length > 1
-                                      ? parts.sublist(1).join(',').trim()
-                                      : '';
-
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () => _selectSuggestion(suggestion),
-                                      splashColor: const Color(0x207CC4FF),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 36,
-                                              height: 36,
-                                              decoration: BoxDecoration(
-                                                color: const Color(0x207CC4FF),
-                                                borderRadius: BorderRadius.circular(10),
-                                              ),
-                                              child: const Icon(
-                                                LucideIcons.mapPin,
-                                                size: 16,
-                                                color: Color(0xFF7CC4FF),
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    city,
-                                                    style: GoogleFonts.inter(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: Colors.white,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                  if (region.isNotEmpty)
-                                                    Text(
-                                                      region,
-                                                      style: GoogleFonts.inter(
-                                                        fontSize: 12,
-                                                        color: const Color(0xFF9FB4C8),
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                ],
-                                              ),
-                                            ),
-                                            const Icon(
-                                              LucideIcons.arrowRight,
-                                              size: 14,
-                                              color: Color(0xFF5A7A94),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-
-                  // Layer toggles
-                  Positioned(
-                    bottom: 150,
-                    left: 20,
-                    right: 20,
-                    child: LayerToggles(
-                      activeLayer: _activeLayer,
-                      onLayerChanged: (layer) => setState(() => _activeLayer = layer),
+                    child: FloatingSearchBar(
+                      currentPosition: latLng,
+                      onSuggestionSelected: _onSuggestionSelected,
+                      nominatimService: _nominatimService,
                     ),
                   ),
                 ],
