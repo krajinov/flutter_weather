@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../home/models/weather_data.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class MapWeatherCard extends StatelessWidget {
   final WeatherData weatherData;
@@ -41,7 +42,7 @@ class MapWeatherCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${weatherData.temperature}°C',
+                        AppLocalizations.of(context)!.tempCelsius(weatherData.temperature.toString()),
                         style: GoogleFonts.dmSans(
                           fontSize: 48,
                           fontWeight: FontWeight.w700,
@@ -98,7 +99,7 @@ class MapWeatherCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${hour.temperature}°C',
+                            AppLocalizations.of(context)!.tempCelsius(hour.temperature.toString()),
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

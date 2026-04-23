@@ -8,6 +8,9 @@ import '../../core/theme/app_theme.dart';
 import '../../home/providers/weather_provider.dart';
 import '../widgets/alert_card.dart';
 import '../widgets/alerts_empty_state.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
+import '../../core/utils/preview_helper.dart';
+
 
 class AlertsScreen extends ConsumerWidget {
   const AlertsScreen({super.key});
@@ -26,7 +29,7 @@ class AlertsScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 20),
               Text(
-                'Weather Alerts',
+                AppLocalizations.of(context)!.weatherAlerts,
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -59,7 +62,7 @@ class AlertsScreen extends ConsumerWidget {
                         const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
                         const SizedBox(height: 16),
                         Text(
-                          'Error loading alerts',
+                          AppLocalizations.of(context)!.errorLoadingAlerts,
                           style: const TextStyle(color: AppColors.textPrimary),
                         ),
                       ],
@@ -75,18 +78,19 @@ class AlertsScreen extends ConsumerWidget {
   }
 }
 
+
 // ─────────────────────────────────────────────────────────────
-// Widget Previews
-// ─────────────────────────────────────────────────────────────
+
 
 @Preview(
   name: 'Alerts Screen',
   group: 'Screens',
   size: Size(390, 844),
-  theme: alertsScreenDarkTheme,
 )
-Widget alertsScreenPreview() => const AlertsScreen();
-
-PreviewThemeData alertsScreenDarkTheme() {
-  return PreviewThemeData(materialDark: AppTheme.darkTheme);
+Widget alertsScreenPreview() {
+  return localizedPreview(
+    const AlertsScreen(),
+    useProviderScope: true,
+  );
 }
+

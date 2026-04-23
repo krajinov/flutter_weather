@@ -1,12 +1,13 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class LocationService {
   /// Determines the current position of the device.
   ///
   /// When the location services are not enabled or permissions
   /// are denied the `Future` will return an error.
-  Future<Position> getCurrentPosition() async {
+  Future<Position> getCurrentPosition({AppLocalizations? l10n}) async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -16,7 +17,7 @@ class LocationService {
       // Location services are not enabled don't continue
       // accessing the position and request users of the 
       // App to enable the location services.
-      return Future.error('Location services are disabled.');
+      return Future.error(l10n?.locationDisabled ?? 'Location services are disabled.');
     }
 
     permission = await Geolocator.checkPermission();
@@ -28,14 +29,14 @@ class LocationService {
         // Android's shouldShowRequestPermissionRationale 
         // returned true. According to Android guidelines
         // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
+        return Future.error(l10n?.locationDenied ?? 'Location permissions are denied');
       }
     }
     
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately. 
       return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
+        l10n?.locationPermanentlyDenied ?? 'Location permissions are permanently denied, we cannot request permissions.');
     } 
 
     // When we reach here, permissions are granted and we can
@@ -44,16 +45,17 @@ class LocationService {
   }
 
   /// Get the city or locality name based on coordinates.
-  Future<String> getCityFromCoordinates(double lat, double lon) async {
+  Future<String> getCityFromCoordinates(double lat, double lon, {AppLocalizations? l10n}) async {
+    final unknownCity = l10n?.unknownCity ?? 'Unknown City';
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
       if (placemarks.isNotEmpty) {
         final placemark = placemarks.first;
-        return placemark.locality ?? placemark.subAdministrativeArea ?? placemark.administrativeArea ?? 'Unknown City';
+        return placemark.locality ?? placemark.subAdministrativeArea ?? placemark.administrativeArea ?? unknownCity;
       }
-      return 'Unknown City';
+      return unknownCity;
     } catch (e) {
-      return 'Unknown City';
+      return unknownCity;
     }
   }
 }

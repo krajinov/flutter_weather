@@ -7,6 +7,9 @@ import '../../core/theme/app_theme.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/toggle_switch.dart';
 import '../widgets/unit_selector.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
+import '../../core/utils/preview_helper.dart';
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               const SizedBox(height: 20),
               Text(
-                'Settings',
+                AppLocalizations.of(context)!.settings,
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -48,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   SettingsRow(
                     icon: LucideIcons.mapPin,
-                    label: 'Current Location',
+                    label: AppLocalizations.of(context)!.currentLocation,
                     trailing: ToggleSwitch(
                       value: _currentLocation,
                       onChanged: (v) => setState(() => _currentLocation = v),
@@ -57,7 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SettingsDivider(),
                   SettingsRow(
                     icon: LucideIcons.plus,
-                    label: 'Add City',
+                    label: AppLocalizations.of(context)!.addCity,
                     trailing: const Icon(
                       LucideIcons.chevronRight,
                       size: 16,
@@ -74,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   SettingsRow(
                     icon: LucideIcons.thermometer,
-                    label: 'Temperature Unit',
+                    label: AppLocalizations.of(context)!.temperatureUnit,
                     trailing: UnitSelector(
                       isCelsius: _isCelsius,
                       onChanged: (v) => setState(() => _isCelsius = v),
@@ -89,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   SettingsRow(
                     icon: LucideIcons.cloudRain,
-                    label: 'Rain Alerts',
+                    label: AppLocalizations.of(context)!.rainAlerts,
                     trailing: ToggleSwitch(
                       value: _rainAlerts,
                       onChanged: (v) => setState(() => _rainAlerts = v),
@@ -98,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SettingsDivider(),
                   SettingsRow(
                     icon: LucideIcons.alertTriangle,
-                    label: 'Severe Weather Alerts',
+                    label: AppLocalizations.of(context)!.severeWeatherAlerts,
                     trailing: ToggleSwitch(
                       value: _severeAlerts,
                       onChanged: (v) => setState(() => _severeAlerts = v),
@@ -113,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   SettingsRow(
                     icon: LucideIcons.moon,
-                    label: 'Dark Mode',
+                    label: AppLocalizations.of(context)!.darkMode,
                     trailing: ToggleSwitch(
                       value: _darkMode,
                       onChanged: (v) => setState(() => _darkMode = v),
@@ -130,20 +133,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
+
 // ─────────────────────────────────────────────────────────────
-// Widget Previews
-// ─────────────────────────────────────────────────────────────
+
 
 @Preview(
   name: 'Settings Screen',
   group: 'Screens',
   size: Size(390, 844),
-  theme: settingsScreenDarkTheme,
 )
-Widget settingsScreenPreview() => const SettingsScreen();
-
-PreviewThemeData settingsScreenDarkTheme() {
-  return PreviewThemeData(
-    materialDark: AppTheme.darkTheme,
-  );
+Widget settingsScreenPreview() {
+  return localizedPreview(const SettingsScreen());
 }
+

@@ -81,6 +81,8 @@
     -  **Deeply Nested Widgets:** Can lead to performance issues and difficult-to-read code.  Simplify the widget tree.
     -  **Unmanaged State:** Forgetting to dispose of resources like `StreamSubscription` or `AnimationController` leading to memory leaks.
     -  **Hardcoded Values:** Avoid hardcoding values like colors, sizes, and strings in the code. Use constants or theme data.
+    -  **String Externalization (Localisation):** All user-facing strings must be extracted into ARB files (`lib/l10n/app_en.arb`). Use `AppLocalizations.of(context)!` for widget strings. For service-level strings, pass `AppLocalizations` as a parameter or move translation to the UI.
+    -  **Localization Imports:** Always use the project-specific generated import: `import 'package:flutter_weather/l10n/generated/app_localizations.dart';`.
     -  **Ignoring Errors:** Not handling exceptions properly can lead to unexpected crashes.  Use `try-catch` blocks and logging.
 
 - **2.4 State Management Best Practices:**

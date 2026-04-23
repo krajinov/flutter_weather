@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class AlertsEmptyState extends StatelessWidget {
   const AlertsEmptyState({super.key});
@@ -24,7 +25,7 @@ class AlertsEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'No alerts right now',
+            AppLocalizations.of(context)!.noAlerts,
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
