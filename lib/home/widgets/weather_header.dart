@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import '../../core/utils/mock_data.dart';
+import '../../core/utils/preview_helper.dart';
 import '../models/weather_data.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
@@ -37,11 +38,13 @@ class WeatherHeader extends StatelessWidget {
 
 @Preview(name: 'Weather Header Preview')
 Widget weatherHeaderPreview() {
-  return Scaffold(
-    backgroundColor: const Color(0xFF0B1220),
-    body: Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: WeatherHeader(data: MockData.sarajevoWeather),
+  return localizedPreview(
+    Scaffold(
+      backgroundColor: const Color(0xFF0B1220),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: WeatherHeader(data: MockData.sarajevoWeather),
+      ),
     ),
   );
 }

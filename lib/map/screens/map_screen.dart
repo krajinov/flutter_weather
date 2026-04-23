@@ -13,6 +13,8 @@ import '../widgets/layer_toggles.dart';
 import '../widgets/map_overlay_widgets.dart';
 import '../widgets/map_weather_card.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
+import '../../core/utils/preview_helper.dart';
+
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -158,20 +160,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 }
 
 
-// ─────────────────────────────────────────────────────────────
-// Widget Previews
+
 // ─────────────────────────────────────────────────────────────
 
+
 @Preview(
+
   name: 'Map Screen',
   group: 'Screens',
   size: Size(390, 844),
-  theme: mapScreenDarkTheme,
 )
-Widget mapScreenPreview() => const MapScreen();
-
-PreviewThemeData mapScreenDarkTheme() {
-  return PreviewThemeData(
-    materialDark: AppTheme.darkTheme,
+Widget mapScreenPreview() {
+  return localizedPreview(
+    const MapScreen(),
+    useProviderScope: true,
   );
 }
+

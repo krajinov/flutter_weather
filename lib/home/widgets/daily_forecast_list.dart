@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/preview_helper.dart';
 import '../models/weather_data.dart';
 import 'glass_card.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
@@ -52,11 +53,13 @@ class DailyForecastList extends StatelessWidget {
 
 @Preview(name: 'Daily Forecast Preview')
 Widget dailyForecastPreview() {
-  return Scaffold(
-    backgroundColor: AppColors.background,
-    body: Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: DailyForecastList(forecasts: MockData.sarajevoWeather.daily),
+  return localizedPreview(
+    Scaffold(
+      backgroundColor: AppColors.background,
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: DailyForecastList(forecasts: MockData.sarajevoWeather.daily),
+      ),
     ),
   );
 }

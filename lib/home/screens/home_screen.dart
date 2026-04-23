@@ -3,7 +3,7 @@ import 'package:flutter/widget_previews.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
+import '../../core/utils/preview_helper.dart';
 import '../../map/screens/map_screen.dart';
 import '../../alerts/screens/alerts_screen.dart';
 import '../../settings/screens/settings_screen.dart';
@@ -145,12 +145,10 @@ class _HomeContent extends ConsumerWidget {
   name: 'Home Screen',
   group: 'Screens',
   size: Size(390, 844),
-  theme: homeScreenDarkTheme,
 )
-Widget homeScreenPreview() => const HomeScreen();
-
-PreviewThemeData homeScreenDarkTheme() {
-  return PreviewThemeData(
-    materialDark: AppTheme.darkTheme,
+Widget homeScreenPreview() {
+  return localizedPreview(
+    const HomeScreen(),
+    useProviderScope: true,
   );
 }
