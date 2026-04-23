@@ -48,6 +48,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _onMapTap(TapPosition tapPosition, LatLng point) {
     ref.read(selectedLocationProvider.notifier).updateLocation(point);
     _mapController.move(point, _mapController.camera.zoom);
+    // Dismiss keyboard and search suggestions when tapping the map
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   void _onSuggestionSelected(PlaceSuggestion suggestion) {
@@ -65,7 +67,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     'temp_new',          // Temperature
     'wind_new',          // Wind
     'clouds_new',        // Clouds
-    'rain_new',          // Rainfall
+    'pressure_new',      // Pressure
   ];
 
   String _overlayUrlForLayer(int layer) {

@@ -18,13 +18,13 @@ class MapLayerChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    // Layers: Radar, Temperature, Wind, Clouds, Rainfall
+    // Layers: Radar, Temperature, Wind, Clouds, Pressure
     final layers = [
       {'name': l10n.radar, 'icon': LucideIcons.radioReceiver},
       {'name': l10n.temperature, 'icon': LucideIcons.thermometer},
       {'name': l10n.wind, 'icon': LucideIcons.wind},
       {'name': l10n.clouds, 'icon': LucideIcons.cloud},
-      {'name': l10n.rainfall, 'icon': LucideIcons.cloudRain},
+      {'name': l10n.pressure, 'icon': LucideIcons.gauge},
     ];
 
     return SingleChildScrollView(
