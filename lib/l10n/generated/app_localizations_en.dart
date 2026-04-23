@@ -103,4 +103,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String tempCelsius(String temp) {
     return '$temp °C';
   }
+
+  @override
+  String get radar => 'Radar';
+
+  @override
+  String get clouds => 'Clouds';
+
+  @override
+  String get rainfall => 'Rainfall';
+
+  @override
+  String get uvIndex => 'UV Index';
+
+  @override
+  String get sunrise => 'Sunrise';
+
+  @override
+  String get sunset => 'Sunset';
+
+  @override
+  String get chanceOfRain => 'Chance of Rain';
+
+  @override
+  String get airQuality => 'Air Quality';
+
+  @override
+  String get searchCity => 'Search city or place';
 }

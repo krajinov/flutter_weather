@@ -7,6 +7,12 @@ class WeatherData {
   final String condition;
   final int feelsLike;
   final int humidity;
+  final double windSpeed;
+  final int windDirection;
+  final double uvi;
+  final DateTime sunrise;
+  final DateTime sunset;
+  final double pop; // Chance of precipitation (0 to 1)
   final List<HourlyForecast> hourly;
   final List<DailyForecast> daily;
   final List<AlertData> alerts;
@@ -17,6 +23,12 @@ class WeatherData {
     required this.condition,
     required this.feelsLike,
     required this.humidity,
+    required this.windSpeed,
+    required this.windDirection,
+    required this.uvi,
+    required this.sunrise,
+    required this.sunset,
+    required this.pop,
     required this.hourly,
     required this.daily,
     required this.alerts,
@@ -43,12 +55,27 @@ class WeatherData {
         ? alertsJson.map((e) => AlertData.fromJson(e)).toList() 
         : <AlertData>[];
 
+    // Calculate max pop for the next 3 hours
+    double maxPop = 0.0;
+    for (int i = 0; i < 3 && i < hourlyJson.length; i++) {
+      final hourPop = (hourlyJson[i]['pop'] as num?)?.toDouble() ?? 0.0;
+      if (hourPop > maxPop) {
+        maxPop = hourPop;
+      }
+    }
+
     return WeatherData(
       city: city,
       temperature: (current['temp'] as num).round(),
       condition: _mapWeatherCondition(current['weather'][0]['main']),
       feelsLike: (current['feels_like'] as num).round(),
       humidity: current['humidity'] as int,
+      windSpeed: (current['wind_speed'] as num?)?.toDouble() ?? 0.0,
+      windDirection: (current['wind_deg'] as num?)?.round() ?? 0,
+      uvi: (current['uvi'] as num?)?.toDouble() ?? 0.0,
+      sunrise: DateTime.fromMillisecondsSinceEpoch((current['sunrise'] as int? ?? 0) * 1000),
+      sunset: DateTime.fromMillisecondsSinceEpoch((current['sunset'] as int? ?? 0) * 1000),
+      pop: maxPop,
       hourly: parsedHourly,
       daily: parsedDaily,
       alerts: parsedAlerts,
@@ -67,6 +94,7 @@ class WeatherData {
     }
   }
 }
+
 
 class HourlyForecast {
   final String time;

@@ -279,6 +279,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{temp} °C'**
   String tempCelsius(String temp);
+
+  /// No description provided for @radar.
+  ///
+  /// In en, this message translates to:
+  /// **'Radar'**
+  String get radar;
+
+  /// No description provided for @clouds.
+  ///
+  /// In en, this message translates to:
+  /// **'Clouds'**
+  String get clouds;
+
+  /// No description provided for @rainfall.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainfall'**
+  String get rainfall;
+
+  /// No description provided for @uvIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'UV Index'**
+  String get uvIndex;
+
+  /// No description provided for @sunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get sunrise;
+
+  /// No description provided for @sunset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset'**
+  String get sunset;
+
+  /// No description provided for @chanceOfRain.
+  ///
+  /// In en, this message translates to:
+  /// **'Chance of Rain'**
+  String get chanceOfRain;
+
+  /// No description provided for @airQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Air Quality'**
+  String get airQuality;
+
+  /// No description provided for @searchCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Search city or place'**
+  String get searchCity;
 }
 
 class _AppLocalizationsDelegate

@@ -5,12 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../../home/providers/weather_provider.dart';
-
 import '../widgets/alert_card.dart';
 import '../widgets/alerts_empty_state.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 import '../../core/utils/preview_helper.dart';
-
 
 class AlertsScreen extends ConsumerWidget {
   const AlertsScreen({super.key});
@@ -45,7 +43,8 @@ class AlertsScreen extends ConsumerWidget {
                         ? ListView.separated(
                             padding: const EdgeInsets.only(bottom: 16),
                             itemCount: alerts.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 12),
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 12),
                             itemBuilder: (context, index) {
                               return AlertCard(alert: alerts[index]);
                             },
@@ -53,13 +52,19 @@ class AlertsScreen extends ConsumerWidget {
                         : const AlertsEmptyState();
                   },
                   loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.statusIconActive),
+                    child: CircularProgressIndicator(
+                      color: AppColors.statusIconActive,
+                    ),
                   ),
                   error: (error, _) => Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
+                        const Icon(
+                          LucideIcons.alertCircle,
+                          color: Colors.redAccent,
+                          size: 48,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context)!.errorLoadingAlerts,
@@ -78,19 +83,9 @@ class AlertsScreen extends ConsumerWidget {
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────
 
-
-@Preview(
-  name: 'Alerts Screen',
-  group: 'Screens',
-  size: Size(390, 844),
-)
+@Preview(name: 'Alerts Screen', group: 'Screens', size: Size(390, 844))
 Widget alertsScreenPreview() {
-  return localizedPreview(
-    const AlertsScreen(),
-    useProviderScope: true,
-  );
+  return localizedPreview(const AlertsScreen(), useProviderScope: true);
 }
-

@@ -39,5 +39,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "radar": "Radar",
+  "clouds": "Clouds",
+  "rainfall": "Rainfall",
+  "uvIndex": "UV Index",
+  "sunrise": "Sunrise",
+  "sunset": "Sunset",
+  "chanceOfRain": "Chance of Rain",
+  "airQuality": "Air Quality",
+  "searchCity": "Search city or place"
 }
+
