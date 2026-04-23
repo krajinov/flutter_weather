@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
 import '../../home/providers/weather_provider.dart';
+
 import '../widgets/alert_card.dart';
 import '../widgets/alerts_empty_state.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';

@@ -6,8 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
 import '../../home/providers/location_provider.dart';
+
 import '../../home/providers/weather_provider.dart';
 import '../widgets/layer_toggles.dart';
 import '../widgets/map_overlay_widgets.dart';
