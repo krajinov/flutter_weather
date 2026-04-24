@@ -298,6 +298,12 @@ abstract class AppLocalizations {
   /// **'Rainfall'**
   String get rainfall;
 
+  /// No description provided for @pressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure'**
+  String get pressure;
+
   /// No description provided for @uvIndex.
   ///
   /// In en, this message translates to:

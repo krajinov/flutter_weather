@@ -114,6 +114,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rainfall => 'Rainfall';
 
   @override
+  String get pressure => 'Pressure';
+
+  @override
   String get uvIndex => 'UV Index';
 
   @override

@@ -43,6 +43,7 @@
   "radar": "Radar",
   "clouds": "Clouds",
   "rainfall": "Rainfall",
+  "pressure": "Pressure",
   "uvIndex": "UV Index",
   "sunrise": "Sunrise",
   "sunset": "Sunset",
