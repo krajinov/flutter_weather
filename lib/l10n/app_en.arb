@@ -34,6 +34,7 @@
   "temperature": "Temperature",
   "wind": "Wind",
   "currentLocation": "Current Location",
+  "useThisLocation": "Use This Location",
   "addCity": "Add City",
   "temperatureUnit": "Temperature Unit",
   "rainAlerts": "Rain Alerts",

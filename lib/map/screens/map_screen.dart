@@ -30,6 +30,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
   LatLng? _lastAppliedCenter;
+  LatLng? _pendingLocation;
 
   double _sheetExtent = 0.15; // default min child size
 
@@ -50,7 +51,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _onMapTap(TapPosition tapPosition, LatLng point) {
-    ref.read(selectedLocationProvider.notifier).updateLocation(point);
+    setState(() => _pendingLocation = point);
     _mapController.move(point, _mapController.camera.zoom);
     // Dismiss keyboard and search suggestions when tapping the map
     FocusManager.instance.primaryFocus?.unfocus();
@@ -59,7 +60,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _onSuggestionSelected(PlaceSuggestion suggestion) {
     final newPoint = LatLng(suggestion.latitude, suggestion.longitude);
     ref.read(selectedLocationProvider.notifier).updateLocation(newPoint);
+    setState(() => _pendingLocation = null);
     _mapController.move(newPoint, 12.0);
+  }
+
+  void _commitPendingLocation() {
+    final pendingLocation = _pendingLocation;
+    if (pendingLocation == null) return;
+
+    ref.read(selectedLocationProvider.notifier).updateLocation(pendingLocation);
+    setState(() => _pendingLocation = null);
   }
 
   void _onLayerChanged(int tapped) {
@@ -101,6 +111,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
   }
 
+  bool _isSameLocation(LatLng a, LatLng? b) {
+    if (b == null) return false;
+    return (a.latitude - b.latitude).abs() < 0.000001 &&
+        (a.longitude - b.longitude).abs() < 0.000001;
+  }
+
   @override
   void dispose() {
     _sheetController.removeListener(_onSheetExtentChanged);
@@ -117,18 +133,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final gpsPosition = locationAsyncValue.whenOrNull(
       data: (position) => position,
     );
-    final latLng =
+    final committedCenter =
         selectedLocation ??
         (gpsPosition != null
             ? LatLng(gpsPosition.latitude, gpsPosition.longitude)
             : _fallbackCenter);
+    final markerPoint = _pendingLocation ?? committedCenter;
+    final showUseThisLocation =
+        _pendingLocation != null &&
+        !_isSameLocation(_pendingLocation!, selectedLocation);
     final weatherData = weatherAsyncValue.whenOrNull(data: (data) => data);
     final screenHeight = MediaQuery.of(context).size.height;
     final chipsBottomOffset = weatherData != null
         ? (screenHeight * _sheetExtent) + 16
         : 116.0;
+    final useLocationBottomOffset = chipsBottomOffset + 56;
 
-    _moveMapIfNeeded(latLng);
+    _moveMapIfNeeded(markerPoint);
 
     return Scaffold(
       backgroundColor: const Color(0xFF071327),
@@ -138,7 +159,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: latLng,
+              initialCenter: markerPoint,
               initialZoom: 13.0,
               onTap: _onMapTap,
             ),
@@ -159,7 +180,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: latLng,
+                    point: markerPoint,
                     width: 60,
                     height: 60,
                     child: const MapPin(),
@@ -200,11 +221,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             left: 20,
             right: 20,
             child: FloatingSearchBar(
-              currentPosition: latLng,
+              currentPosition: markerPoint,
               onSuggestionSelected: _onSuggestionSelected,
               nominatimService: _nominatimService,
             ),
           ),
+
+          if (showUseThisLocation)
+            Positioned(
+              bottom: useLocationBottomOffset,
+              left: 20,
+              right: 20,
+              child: _UseLocationButton(onPressed: _commitPendingLocation),
+            ),
 
           if (selectedLocation == null && locationAsyncValue.hasError)
             Positioned(
@@ -297,6 +326,27 @@ class _LocationStatusBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _UseLocationButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _UseLocationButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(LucideIcons.mapPin, size: 18),
+      label: Text(AppLocalizations.of(context)!.useThisLocation),
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(44),
+        backgroundColor: const Color(0xFF0EA5E9),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
