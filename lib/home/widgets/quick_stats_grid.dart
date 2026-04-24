@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/preview_helper.dart';
@@ -21,14 +22,20 @@ class QuickStatsGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  AppLocalizations.of(context)!.feelsLike,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.feelsLike,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const Icon(LucideIcons.thermometer, size: 16, color: AppColors.statusIconActive),
+                  ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   AppLocalizations.of(context)!.tempCelsius(data.feelsLike.toString()),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -46,14 +53,20 @@ class QuickStatsGrid extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  AppLocalizations.of(context)!.humidity,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.humidity,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const Icon(LucideIcons.droplets, size: 16, color: AppColors.statusIconActive),
+                  ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   '${data.humidity}%',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(

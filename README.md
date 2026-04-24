@@ -43,14 +43,14 @@ A beautiful, modern, dark-themed, glassmorphic weather application built for iOS
    ```
 
 3. **Configure Environment Variables:**
-   Create a `.env` file in the root directory (you can use `.env.example` as a template) and add your OpenWeather API Key:
+   Create a `.env` file in the root directory and add your OpenWeather API Key:
    ```env
    OPENWEATHER_API_KEY=your_api_key_here
    ```
 
 4. **Run the Application:**
    ```bash
-   flutter run
+   flutter run --dart-define-from-file=.env
    ```
 
 ## 🏗 Architecture

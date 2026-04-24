@@ -58,4 +58,17 @@ class LocationService {
       return unknownCity;
     }
   }
+
+  /// Get coordinates from an address string.
+  Future<Location?> getCoordinatesFromAddress(String address) async {
+    try {
+      List<Location> locations = await locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        return locations.first;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }

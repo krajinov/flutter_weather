@@ -8,10 +8,7 @@ import '../../map/screens/map_screen.dart';
 import '../../alerts/screens/alerts_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../providers/weather_provider.dart';
-import '../widgets/daily_forecast_list.dart';
-import '../widgets/hourly_forecast_list.dart';
-import '../widgets/quick_stats_grid.dart';
-import '../widgets/weather_header.dart';
+import '../widgets/home_weather_overview.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,17 +31,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: Container(
         height: 88,
         decoration: const BoxDecoration(
           color: AppColors.navBarColor,
-          border: Border(
-            top: BorderSide(color: Color(0xFF243447), width: 1),
-          ),
+          border: Border(top: BorderSide(color: Color(0xFF243447), width: 1)),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
@@ -52,8 +44,14 @@ class _HomeScreenState extends State<HomeScreen> {
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.statusIconActive,
           unselectedItemColor: AppColors.textSecondary,
-          selectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-          unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          selectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: [
@@ -88,47 +86,40 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsyncValue = ref.watch(weatherProvider);
 
-    return SafeArea(
-      child: weatherAsyncValue.when(
-        data: (weatherData) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                WeatherHeader(data: weatherData),
-                const SizedBox(height: 32),
-                QuickStatsGrid(data: weatherData),
-                const SizedBox(height: 24),
-                HourlyForecastList(forecasts: weatherData.hourly),
-                const SizedBox(height: 24),
-                DailyForecastList(forecasts: weatherData.daily),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.statusIconActive),
-        ),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(LucideIcons.alertCircle, color: Colors.redAccent, size: 48),
-                const SizedBox(height: 16),
-                Text(
-                  '${AppLocalizations.of(context)!.errorLoadingWeather}\n${error.toString()}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(weatherProvider.future),
-                  child: Text(AppLocalizations.of(context)!.retry),
-                )
-              ],
+    return Container(
+      color: const Color(0xFF071327),
+      child: SafeArea(
+        child: weatherAsyncValue.when(
+          data: (weatherData) {
+            return HomeWeatherOverview(data: weatherData);
+          },
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.statusIconActive),
+          ),
+          error: (error, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    LucideIcons.alertCircle,
+                    color: Colors.redAccent,
+                    size: 48,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${AppLocalizations.of(context)!.errorLoadingWeather}\n${error.toString()}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref.refresh(weatherProvider.future),
+                    child: Text(AppLocalizations.of(context)!.retry),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -141,14 +132,7 @@ class _HomeContent extends ConsumerWidget {
 // Widget Previews
 // ─────────────────────────────────────────────────────────────
 
-@Preview(
-  name: 'Home Screen',
-  group: 'Screens',
-  size: Size(390, 844),
-)
+@Preview(name: 'Home Screen', group: 'Screens', size: Size(390, 844))
 Widget homeScreenPreview() {
-  return localizedPreview(
-    const HomeScreen(),
-    useProviderScope: true,
-  );
+  return localizedPreview(const HomeScreen(), useProviderScope: true);
 }

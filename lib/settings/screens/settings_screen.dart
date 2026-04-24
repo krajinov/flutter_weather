@@ -4,12 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/settings_section.dart';
-
 import '../widgets/toggle_switch.dart';
 import '../widgets/unit_selector.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 import '../../core/utils/preview_helper.dart';
-
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -133,16 +131,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-
 // ─────────────────────────────────────────────────────────────
 
-
-@Preview(
-  name: 'Settings Screen',
-  group: 'Screens',
-  size: Size(390, 844),
-)
+@Preview(name: 'Settings Screen', group: 'Screens', size: Size(390, 844))
 Widget settingsScreenPreview() {
   return localizedPreview(const SettingsScreen());
 }
-

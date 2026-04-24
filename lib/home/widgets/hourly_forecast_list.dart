@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/preview_helper.dart';
@@ -11,6 +12,28 @@ class HourlyForecastList extends StatelessWidget {
   final List<HourlyForecast> forecasts;
 
   const HourlyForecastList({super.key, required this.forecasts});
+
+  IconData _getWeatherIcon(String descriptor) {
+    switch (descriptor.toLowerCase()) {
+      case 'sun':
+        return LucideIcons.sun;
+      case 'cloud-sun':
+        return LucideIcons.cloudSun;
+      case 'cloud':
+        return LucideIcons.cloud;
+      case 'rain':
+      case 'cloud-rain':
+        return LucideIcons.cloudRain;
+      case 'moon':
+        return LucideIcons.moon;
+      case 'lightning':
+        return LucideIcons.cloudLightning;
+      case 'snow':
+        return LucideIcons.cloudSnow;
+      default:
+        return LucideIcons.cloud;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +48,7 @@ class HourlyForecastList extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 80,
+          height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: forecasts.length,
@@ -44,6 +67,12 @@ class HourlyForecastList extends StatelessWidget {
                             color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
+                    ),
+                    const SizedBox(height: 8),
+                    Icon(
+                      _getWeatherIcon(forecast.iconDescriptor),
+                      size: 20,
+                      color: Colors.white,
                     ),
                     const SizedBox(height: 8),
                     Text(

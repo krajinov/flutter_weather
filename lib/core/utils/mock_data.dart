@@ -7,6 +7,12 @@ class MockData {
         condition: 'Mostly Sunny',
         feelsLike: 24,
         humidity: 56,
+        windSpeed: 12.5,
+        windDirection: 180,
+        uvi: 5.2,
+        sunrise: DateTime(2026, 4, 23, 6, 15),
+        sunset: DateTime(2026, 4, 23, 19, 45),
+        pop: 0.1,
         hourly: [
           HourlyForecast(time: '13:00', temperature: 22, iconDescriptor: 'sun'),
           HourlyForecast(time: '16:00', temperature: 21, iconDescriptor: 'cloud-sun'),
