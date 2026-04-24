@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -26,12 +27,15 @@ class PlaceSuggestion {
     // Build a readable display name from the available properties
     final parts = <String>[];
     if (properties['name'] != null) parts.add(properties['name'] as String);
-    if (properties['city'] != null && properties['city'] != properties['name']) {
+    if (properties['city'] != null &&
+        properties['city'] != properties['name']) {
       parts.add(properties['city'] as String);
     }
     if (properties['county'] != null) parts.add(properties['county'] as String);
     if (properties['state'] != null) parts.add(properties['state'] as String);
-    if (properties['country'] != null) parts.add(properties['country'] as String);
+    if (properties['country'] != null) {
+      parts.add(properties['country'] as String);
+    }
 
     return PlaceSuggestion(
       displayName: parts.isNotEmpty ? parts.join(', ') : 'Unknown Place',
@@ -77,15 +81,20 @@ class NominatimService {
     final uri = Uri.parse(_baseUrl).replace(queryParameters: queryParams);
 
     try {
-      final response = await http.get(uri, headers: {
-        'User-Agent': 'FlutterWeatherApp_Redesign_Autocomplete_v4',
-        'Accept': 'application/json',
-      });
+      final response = await http
+          .get(
+            uri,
+            headers: {
+              'User-Agent': 'FlutterWeatherApp_Redesign_Autocomplete_v4',
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final features = data['features'] as List<dynamic>;
-        
+
         final results = features
             .map((e) => PlaceSuggestion.fromJson(e as Map<String, dynamic>))
             .toList();
@@ -103,16 +112,18 @@ class NominatimService {
         uniqueResults.sort((a, b) {
           final aIsPlace = a.category == 'place' || a.category == 'boundary';
           final bIsPlace = b.category == 'place' || b.category == 'boundary';
-          
+
           if (aIsPlace && !bIsPlace) return -1;
           if (!aIsPlace && bIsPlace) return 1;
           return 0; // Maintain API's internal relevance/distance ordering for the rest
         });
 
-        debugPrint('[PhotonSearch] "$trimmed": ${uniqueResults.length} results returned');
+        debugPrint(
+          '[PhotonSearch] "$trimmed": ${uniqueResults.length} results returned',
+        );
         return uniqueResults.take(10).toList();
       }
-      
+
       debugPrint('[PhotonSearch] HTTP ${response.statusCode} for "$trimmed"');
       return [];
     } catch (e) {

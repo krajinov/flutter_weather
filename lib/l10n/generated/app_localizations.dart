@@ -136,6 +136,24 @@ abstract class AppLocalizations {
   /// **'Weather Alerts'**
   String get weatherAlerts;
 
+  /// No description provided for @loadingWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading weather...'**
+  String get loadingWeather;
+
+  /// No description provided for @keyConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Key conditions'**
+  String get keyConditions;
+
+  /// No description provided for @nextHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Next hours'**
+  String get nextHours;
+
   /// No description provided for @errorLoadingWeather.
   ///
   /// In en, this message translates to:
@@ -171,6 +189,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Feels Like'**
   String get feelsLike;
+
+  /// No description provided for @feelsLikeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Feels like {value}'**
+  String feelsLikeValue(String value);
 
   /// No description provided for @humidity.
   ///
@@ -327,6 +351,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chance of Rain'**
   String get chanceOfRain;
+
+  /// No description provided for @precipitationChance.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} precipitation'**
+  String precipitationChance(String value);
 
   /// No description provided for @airQuality.
   ///

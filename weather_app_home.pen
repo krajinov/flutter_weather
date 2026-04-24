@@ -1,0 +1,197 @@
+Weather App Home - Pencil Design Suggestions
+Canvas: mobile, 390 x 844
+Goal: make Home feel visually consistent with Map bottom sheet.
+Style source: dark map surface, blurred glass panels, 20-32px radii, thin blue-gray borders,
+soft cyan accent icons, compact data cards, dense but breathable weather information.
+
+Shared visual tokens
+- Background: #071327 base with subtle vertical depth toward #0D1E30.
+- Primary glass: #0D1E30 at 72% opacity, blur 20, border #7FA5C8 at 20%.
+- Secondary glass: #13263A at 20% opacity, border #7FA5C8 at 20%.
+- Accent: #7CC4FF for icons, small dividers, selected states.
+- Primary text: #FFFFFF. Secondary text: #C4D5E4. Muted text: #9FB4C8.
+- Main radius: 28-32 on hero/sheet containers, 16-20 on metric cards.
+- Icons: Lucide line icons, 16-24px, circular pale-blue icon wells for primary conditions.
+- Spacing: 20px screen gutters, 12px grid gaps, 16-20px section padding.
+
+Data priority for all designs
+- Always visible: city, condition, current temperature, feels like.
+- Primary insights: precipitation chance, wind speed, humidity.
+- Secondary insights: UV index, sunrise, sunset, pressure if available later.
+- Forecasts: compact hourly chips and 5-7 day rows.
+
+----------------------------------------------------------------------------
+DESIGN 1 - "Sheet Home"
+Best when you want Home to feel like the Map bottom sheet expanded into a full screen.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  |  Sarajevo                         [ search ]   |
+  |  Mostly sunny today                            |
+  |                                                |
+  |      .----------------------------------.      |
+  |      |   (sun icon)       23 C          |      |
+  |      |   Feels like 24 C                |      |
+  |      |   Light breeze, low rain risk    |      |
+  |      '----------------------------------'      |
+  |                                                |
+  |  .---------------- glass sheet ---------------.|
+  |  |  _                                          ||
+  |  |  Key conditions                             ||
+  |  |                                            ||
+  |  |  .--------------.  .--------------.        ||
+  |  |  | precipitation|  | wind         |        ||
+  |  |  | 10%          |  | 18.0 km/h    |        ||
+  |  |  '--------------'  '--------------'        ||
+  |  |  .--------------.  .--------------.        ||
+  |  |  | humidity     |  | UV index     |        ||
+  |  |  | 56%          |  | 5.2          |        ||
+  |  |  '--------------'  '--------------'        ||
+  |  |                                            ||
+  |  |  Next hours                                ||
+  |  |  [13:00 sun 22] [16:00 cloud 21] [...]     ||
+  |  |                                            ||
+  |  |  7-day forecast                            ||
+  |  |  Today   sun      24 C / 15 C              ||
+  |  |  Tue     cloud    21 C / 13 C              ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  Home        Map        Alerts      Settings   |
+  '------------------------------------------------'
+
+Layout notes
+- Top area is not a card. Keep it as quiet page chrome over dark background.
+- Current weather summary uses a floating hero pill, matching the sheet header row:
+  circular icon well left, city summary center, large temp right.
+- Large primary glass sheet starts around y=210, radius 32, same as map bottom sheet.
+- The first grid should be 2 x 2 and include precipitation, wind, humidity, UV.
+- Hourly chips should reuse the bottom sheet mini-hour cards: 70px wide, #13263A 20%.
+- Daily forecast rows should look like bottom sheet rows, not standalone heavy cards.
+
+Implementation direction
+- Replace the current separated header + stats + lists with one HomeWeatherSheet widget.
+- Reuse or extract private bottom sheet card styles into shared weather glass components.
+- Keep scrolling inside the page, not a draggable sheet on Home.
+
+----------------------------------------------------------------------------
+DESIGN 2 - "Insight Deck"
+Best when you want the Home screen to emphasize readable metrics first, with forecasts below.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  |  Sarajevo                                      |
+  |  Updated 13:04                    (sun icon)   |
+  |                                                |
+  |  23 C                                          |
+  |  Mostly sunny                                  |
+  |                                                |
+  |  .--------------------------------------------.|
+  |  |  Today's highlights                         ||
+  |  |                                            ||
+  |  |  .-----------. .-----------. .-----------.  ||
+  |  |  | rain      | | wind      | | humidity  |  ||
+  |  |  | 10%       | | 18 km/h   | | 56%       |  ||
+  |  |  '-----------' '-----------' '-----------'  ||
+  |  |                                            ||
+  |  |  .--------------------. .----------------.  ||
+  |  |  | sunrise 06:15      | | sunset 19:45   |  ||
+  |  |  '--------------------' '----------------'  ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  .--------------------------------------------.|
+  |  |  Hourly                                    ||
+  |  |  [now 23] [14 24] [15 24] [16 21] [17 20] ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  .--------------------------------------------.|
+  |  |  Forecast                                  ||
+  |  |  Today   sun      24 C      15 C           ||
+  |  |  Tue     cloud    21 C      13 C           ||
+  |  |  Wed     rain     18 C      11 C           ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  Home        Map        Alerts      Settings   |
+  '------------------------------------------------'
+
+Layout notes
+- Hero weather remains unframed and prominent, preventing the screen from becoming a stack of cards.
+- "Today's highlights" is the main sheet-like glass panel.
+- Use three compact top metrics in a horizontal row for precipitation, wind, humidity.
+- Sunrise/sunset use wider half-width pills to avoid cramped labels.
+- Forecast modules below should be glass bands, not floating cards nested in cards.
+
+Implementation direction
+- Add a WeatherHighlights widget with adaptive grid:
+  row 1: three equal metrics on width >= 360; 2-column fallback below.
+  row 2: two half-width time metrics.
+- HourlyForecastList and DailyForecastList should adopt the same glass panel surface.
+- This option changes the least navigation structure and reads well on smaller phones.
+
+----------------------------------------------------------------------------
+DESIGN 3 - "Compact Control Panel"
+Best when you want a denser operational dashboard, closer to the map overlay controls.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  |  .--------------------------------------------.|
+  |  | Sarajevo                         [locate]  ||
+  |  | Mostly sunny today                         ||
+  |  |                                            ||
+  |  |  23 C                 feels 24 C           ||
+  |  |  (sun icon)           low rain risk        ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  [ Overview ] [ Wind ] [ Rain ] [ Sun ]        |
+  |                                                |
+  |  .--------------------------------------------.|
+  |  | Overview metrics                            ||
+  |  |                                            ||
+  |  |  precipitation  10%       humidity  56%    ||
+  |  |  wind           18 km/h   UV        5.2    ||
+  |  |  sunrise        06:15     sunset    19:45  ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  .--------------------------------------------.|
+  |  | Temperature trend                           ||
+  |  |      24       24                            ||
+  |  |  23     23          21      20              ||
+  |  |  now   14   15   16   17   18              ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  .--------------------------------------------.|
+  |  | Daily outlook                               ||
+  |  | Today  sun       24 / 15                    ||
+  |  | Tue    cloud     21 / 13                    ||
+  |  '--------------------------------------------'|
+  |                                                |
+  |  Home        Map        Alerts      Settings   |
+  '------------------------------------------------'
+
+Layout notes
+- Top summary is a single glass panel, similar to a map floating search/control surface.
+- Segmented chips mirror map layer chips, but filter the metric panel rather than map layers.
+- Default tab is Overview; Wind/Rain/Sun can later show focused detail without changing layout.
+- Metric area is a dense two-column list, which is better for many readings than small cards.
+- Trend panel can start as hourly chips and evolve into a simple line chart later.
+
+Implementation direction
+- Build a HomeMetricTabs widget using the same chip styling as MapLayerChips.
+- Use a MetricRowsPanel for precipitation, wind, humidity, UV, sunrise, sunset.
+- Keep cards full-width bands with no nested card hierarchy.
+- This option is the most scalable if you plan to add pressure, visibility, air quality,
+  dew point, or detailed wind direction later.
+
+----------------------------------------------------------------------------
+Recommended direction
+Use Design 1 if the priority is visual consistency with the map bottom sheet.
+Use Design 2 if the priority is readability and a balanced home dashboard.
+Use Design 3 if the priority is future extensibility and denser weather tooling.
+
+My recommended implementation path:
+1. Start with Design 1 as the visual target.
+2. Extract shared glass styles from map bottom sheet into a reusable widget or theme helper.
+3. Add precipitation, wind, humidity, UV, sunrise, and sunset to the home sheet.
+4. Restyle hourly and daily forecast sections to use the same surface, spacing, and typography.

@@ -30,6 +30,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weatherAlerts => 'Weather Alerts';
 
   @override
+  String get loadingWeather => 'Loading weather...';
+
+  @override
+  String get keyConditions => 'Key conditions';
+
+  @override
+  String get nextHours => 'Next hours';
+
+  @override
   String get errorLoadingWeather => 'Error loading weather';
 
   @override
@@ -46,6 +55,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feelsLike => 'Feels Like';
+
+  @override
+  String feelsLikeValue(String value) {
+    return 'Feels like $value';
+  }
 
   @override
   String get humidity => 'Humidity';
@@ -127,6 +141,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chanceOfRain => 'Chance of Rain';
+
+  @override
+  String precipitationChance(String value) {
+    return '$value precipitation';
+  }
 
   @override
   String get airQuality => 'Air Quality';

@@ -8,13 +8,9 @@ import 'home/screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env", isOptional: true);
 
-  runApp(
-    const ProviderScope(
-      child: WeatherApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: WeatherApp()));
 }
 
 class WeatherApp extends StatelessWidget {

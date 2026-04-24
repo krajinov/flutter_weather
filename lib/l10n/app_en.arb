@@ -9,12 +9,23 @@
   "settings": "SETTINGS",
   "retry": "Retry",
   "weatherAlerts": "Weather Alerts",
+  "loadingWeather": "Loading weather...",
+  "keyConditions": "Key conditions",
+  "nextHours": "Next hours",
   "errorLoadingWeather": "Error loading weather",
   "errorLoadingAlerts": "Error loading alerts",
   "errorLoadingLocation": "Error loading location",
   "noAlerts": "No alerts right now",
   "today": "Today",
   "feelsLike": "Feels Like",
+  "feelsLikeValue": "Feels like {value}",
+  "@feelsLikeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "humidity": "Humidity",
   "windSpeed": "Wind Speed",
   "hourlyForecast": "Hourly Forecast",
@@ -48,7 +59,14 @@
   "sunrise": "Sunrise",
   "sunset": "Sunset",
   "chanceOfRain": "Chance of Rain",
+  "precipitationChance": "{value} precipitation",
+  "@precipitationChance": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "airQuality": "Air Quality",
   "searchCity": "Search city or place"
 }
-
