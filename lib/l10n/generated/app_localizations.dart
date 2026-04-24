@@ -244,6 +244,12 @@ abstract class AppLocalizations {
   /// **'Current Location'**
   String get currentLocation;
 
+  /// No description provided for @useThisLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use This Location'**
+  String get useThisLocation;
+
   /// No description provided for @addCity.
   ///
   /// In en, this message translates to:

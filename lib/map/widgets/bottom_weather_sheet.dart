@@ -58,7 +58,7 @@ class PremiumWeatherSheet extends StatelessWidget {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 2.2,
+                      childAspectRatio: 1.9,
                       children: _buildInsightCards(context),
                     ),
                   ),
@@ -342,7 +342,7 @@ class _InsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0x3313263A),
         borderRadius: BorderRadius.circular(16),
@@ -350,7 +350,7 @@ class _InsightCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
@@ -361,21 +361,23 @@ class _InsightCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
+                  height: 1.1,
                   color: const Color(0xFF9FB4C8),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-          const SizedBox(height: 8),
           Text(
             value,
             style: GoogleFonts.inter(
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
+              height: 1.1,
               color: Colors.white,
             ),
             overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ],
       ),
