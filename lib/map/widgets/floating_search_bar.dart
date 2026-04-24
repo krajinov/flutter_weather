@@ -30,6 +30,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
   bool _isSearching = false;
   bool _showSuggestions = false;
   Timer? _debounceTimer;
+  int _activeSearchRequestId = 0;
 
   @override
   void initState() {
@@ -45,24 +46,26 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
   }
 
   void _onSearchChanged() {
-    final query = _searchController.text;
+    final query = _searchController.text.trim();
+    final requestId = ++_activeSearchRequestId;
     _debounceTimer?.cancel();
 
-    if (query.trim().length < 2) {
+    if (query.length < 2) {
       setState(() {
         _suggestions = [];
         _showSuggestions = false;
+        _isSearching = false;
       });
       return;
     }
 
     _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      _fetchSuggestions(query);
+      _fetchSuggestions(query, requestId);
     });
   }
 
-  Future<void> _fetchSuggestions(String query) async {
-    if (!mounted) return;
+  Future<void> _fetchSuggestions(String query, int requestId) async {
+    if (!mounted || requestId != _activeSearchRequestId) return;
     setState(() => _isSearching = true);
 
     final results = await widget.nominatimService.searchPlaces(
@@ -71,24 +74,26 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
       biasLon: widget.currentPosition?.longitude,
     );
 
-    if (mounted) {
-      setState(() {
-        _suggestions = results;
-        _showSuggestions = results.isNotEmpty;
-        _isSearching = false;
-      });
-    }
+    if (!mounted || requestId != _activeSearchRequestId) return;
+
+    setState(() {
+      _suggestions = results;
+      _showSuggestions = _searchFocusNode.hasFocus && results.isNotEmpty;
+      _isSearching = false;
+    });
   }
 
   void _handleSuggestionSelected(PlaceSuggestion suggestion) {
     widget.onSuggestionSelected(suggestion);
-    
+    _activeSearchRequestId++;
+
     setState(() {
       _searchController.removeListener(_onSearchChanged);
       _searchController.text = suggestion.displayName.split(',').first;
       _searchController.addListener(_onSearchChanged);
       _suggestions = [];
       _showSuggestions = false;
+      _isSearching = false;
     });
 
     _searchFocusNode.unfocus();
@@ -123,7 +128,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                     color: Color(0x40000000),
                     blurRadius: 15,
                     offset: Offset(0, 4),
-                  )
+                  ),
                 ],
               ),
               child: TextField(
@@ -133,27 +138,41 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.searchCity,
                   hintStyle: const TextStyle(color: Color(0xFFAFC2D3)),
-                  prefixIcon: const Icon(LucideIcons.search, color: Color(0xFF7CC4FF)),
+                  prefixIcon: const Icon(
+                    LucideIcons.search,
+                    color: Color(0xFF7CC4FF),
+                  ),
                   suffixIcon: _isSearching
                       ? const Padding(
                           padding: EdgeInsets.all(14.0),
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7CC4FF)),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF7CC4FF),
+                          ),
                         )
                       : _searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(LucideIcons.x, color: Color(0xFF7CC4FF)),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _suggestions = [];
-                                  _showSuggestions = false;
-                                });
-                                _searchFocusNode.requestFocus();
-                              },
-                            )
-                          : null,
+                      ? IconButton(
+                          icon: const Icon(
+                            LucideIcons.x,
+                            color: Color(0xFF7CC4FF),
+                          ),
+                          onPressed: () {
+                            _activeSearchRequestId++;
+                            _searchController.clear();
+                            setState(() {
+                              _suggestions = [];
+                              _showSuggestions = false;
+                              _isSearching = false;
+                            });
+                            _searchFocusNode.requestFocus();
+                          },
+                        )
+                      : null,
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 15,
+                  ),
                 ),
               ),
             ),
@@ -174,7 +193,7 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                   color: Color(0x60000000),
                   blurRadius: 20,
                   offset: Offset(0, 8),
-                )
+                ),
               ],
             ),
             child: ClipRRect(
@@ -204,7 +223,10 @@ class _FloatingSearchBarState extends State<FloatingSearchBar> {
                         onTap: () => _handleSuggestionSelected(suggestion),
                         splashColor: const Color(0x207CC4FF),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                           child: Row(
                             children: [
                               Container(

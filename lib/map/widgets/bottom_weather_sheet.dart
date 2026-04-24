@@ -11,7 +11,7 @@ class PremiumWeatherSheet extends StatelessWidget {
   final DraggableScrollableController? controller;
 
   const PremiumWeatherSheet({
-    super.key, 
+    super.key,
     required this.weatherData,
     this.controller,
   });
@@ -33,7 +33,9 @@ class PremiumWeatherSheet extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xB80D1E30),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
                 border: Border.all(color: const Color(0x337FA5C8)),
                 boxShadow: const [
                   BoxShadow(
@@ -47,10 +49,8 @@ class PremiumWeatherSheet extends StatelessWidget {
                 controller: scrollController,
                 slivers: [
                   // Drag handle & Collapsed Header
-                  SliverToBoxAdapter(
-                    child: _buildHeader(context),
-                  ),
-                  
+                  SliverToBoxAdapter(child: _buildHeader(context)),
+
                   // Half Expanded: Quick Insights Grid
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
@@ -64,9 +64,7 @@ class PremiumWeatherSheet extends StatelessWidget {
                   ),
 
                   // Half Expanded: Mini Hourly Forecast (Next 6h)
-                  SliverToBoxAdapter(
-                    child: _buildMiniHourly(context),
-                  ),
+                  SliverToBoxAdapter(child: _buildMiniHourly(context)),
 
                   // Full Expanded: 7-day forecast
                   SliverToBoxAdapter(
@@ -76,7 +74,9 @@ class PremiumWeatherSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context)!.next3Days, // or 7 days
+                            AppLocalizations.of(
+                              context,
+                            )!.next3Days, // or 7 days
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -84,7 +84,9 @@ class PremiumWeatherSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ...weatherData.daily.take(7).map((d) => _buildDailyRow(context, d)),
+                          ...weatherData.daily
+                              .take(7)
+                              .map((d) => _buildDailyRow(context, d)),
                         ],
                       ),
                     ),
@@ -126,7 +128,9 @@ class PremiumWeatherSheet extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  weatherData.condition == 'Sunny' ? LucideIcons.sun : LucideIcons.cloud,
+                  weatherData.condition == 'Sunny'
+                      ? LucideIcons.sun
+                      : LucideIcons.cloud,
                   color: const Color(0xFF7CC4FF),
                   size: 24,
                 ),
@@ -158,7 +162,9 @@ class PremiumWeatherSheet extends StatelessWidget {
               ),
               // Temp
               Text(
-                AppLocalizations.of(context)!.tempCelsius(weatherData.temperature.toString()),
+                AppLocalizations.of(
+                  context,
+                )!.tempCelsius(weatherData.temperature.toString()),
                 style: GoogleFonts.dmSans(
                   fontSize: 36,
                   fontWeight: FontWeight.w700,
@@ -183,7 +189,8 @@ class PremiumWeatherSheet extends StatelessWidget {
       _InsightCard(
         icon: LucideIcons.wind,
         title: l10n.windSpeed,
-        value: '${weatherData.windSpeed} km/h',
+        value:
+            '${weatherData.windSpeedKilometersPerHour.toStringAsFixed(1)} km/h',
       ),
       _InsightCard(
         icon: LucideIcons.droplets,
@@ -215,7 +222,9 @@ class PremiumWeatherSheet extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         physics: const BouncingScrollPhysics(),
-        itemCount: weatherData.hourly.length > 6 ? 6 : weatherData.hourly.length,
+        itemCount: weatherData.hourly.length > 6
+            ? 6
+            : weatherData.hourly.length,
         itemBuilder: (context, index) {
           final hour = weatherData.hourly[index];
           return Container(
@@ -238,13 +247,17 @@ class PremiumWeatherSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Icon(
-                  hour.iconDescriptor == 'sun' ? LucideIcons.sun : LucideIcons.cloud,
+                  hour.iconDescriptor == 'sun'
+                      ? LucideIcons.sun
+                      : LucideIcons.cloud,
                   color: Colors.white,
                   size: 20,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  AppLocalizations.of(context)!.tempCelsius(hour.temperature.toString()),
+                  AppLocalizations.of(
+                    context,
+                  )!.tempCelsius(hour.temperature.toString()),
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -287,7 +300,9 @@ class PremiumWeatherSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.tempCelsius(day.minTemp.toString()),
+                  AppLocalizations.of(
+                    context,
+                  )!.tempCelsius(day.minTemp.toString()),
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     color: const Color(0xFF7FA5C8),
@@ -295,7 +310,9 @@ class PremiumWeatherSheet extends StatelessWidget {
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  AppLocalizations.of(context)!.tempCelsius(day.maxTemp.toString()),
+                  AppLocalizations.of(
+                    context,
+                  )!.tempCelsius(day.maxTemp.toString()),
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
