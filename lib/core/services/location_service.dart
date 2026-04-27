@@ -15,9 +15,11 @@ class LocationService {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       // Location services are not enabled don't continue
-      // accessing the position and request users of the 
+      // accessing the position and request users of the
       // App to enable the location services.
-      return Future.error(l10n?.locationDisabled ?? 'Location services are disabled.');
+      return Future.error(
+        l10n?.locationDisabled ?? 'Location services are disabled.',
+      );
     }
 
     permission = await Geolocator.checkPermission();
@@ -26,18 +28,22 @@ class LocationService {
       if (permission == LocationPermission.denied) {
         // Permissions are denied, next time you could try
         // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale 
+        // Android's shouldShowRequestPermissionRationale
         // returned true. According to Android guidelines
         // your App should show an explanatory UI now.
-        return Future.error(l10n?.locationDenied ?? 'Location permissions are denied');
+        return Future.error(
+          l10n?.locationDenied ?? 'Location permissions are denied',
+        );
       }
     }
-    
+
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately. 
+      // Permissions are denied forever, handle appropriately.
       return Future.error(
-        l10n?.locationPermanentlyDenied ?? 'Location permissions are permanently denied, we cannot request permissions.');
-    } 
+        l10n?.locationPermanentlyDenied ??
+            'Location permissions are permanently denied, we cannot request permissions.',
+      );
+    }
 
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
@@ -45,13 +51,20 @@ class LocationService {
   }
 
   /// Get the city or locality name based on coordinates.
-  Future<String> getCityFromCoordinates(double lat, double lon, {AppLocalizations? l10n}) async {
+  Future<String> getCityFromCoordinates(
+    double lat,
+    double lon, {
+    AppLocalizations? l10n,
+  }) async {
     final unknownCity = l10n?.unknownCity ?? 'Unknown City';
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
       if (placemarks.isNotEmpty) {
         final placemark = placemarks.first;
-        return placemark.locality ?? placemark.subAdministrativeArea ?? placemark.administrativeArea ?? unknownCity;
+        return placemark.locality ??
+            placemark.subAdministrativeArea ??
+            placemark.administrativeArea ??
+            unknownCity;
       }
       return unknownCity;
     } catch (e) {

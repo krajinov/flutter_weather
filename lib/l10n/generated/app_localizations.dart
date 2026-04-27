@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
-  /// **'SETTINGS'**
+  /// **'Settings'**
   String get settings;
 
   /// No description provided for @retry.

@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alerts => 'ALERTS';
 
   @override
-  String get settings => 'SETTINGS';
+  String get settings => 'Settings';
 
   @override
   String get retry => 'Retry';

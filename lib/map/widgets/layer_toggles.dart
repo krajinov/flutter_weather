@@ -17,7 +17,7 @@ class MapLayerChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Layers: Radar, Temperature, Wind, Clouds, Pressure
     final layers = [
       {'name': l10n.radar, 'icon': LucideIcons.radioReceiver},
@@ -41,7 +41,9 @@ class MapLayerChips extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: BackdropFilter(
-                  filter: isActive ? ImageFilter.blur(sigmaX: 0, sigmaY: 0) : ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  filter: isActive
+                      ? ImageFilter.blur(sigmaX: 0, sigmaY: 0)
+                      : ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeOutCubic,
@@ -54,14 +56,17 @@ class MapLayerChips extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       border: isActive
                           ? null
-                          : Border.all(color: const Color(0x1AFFFFFF), width: 1),
+                          : Border.all(
+                              color: const Color(0x1AFFFFFF),
+                              width: 1,
+                            ),
                       boxShadow: isActive
                           ? [
                               const BoxShadow(
                                 color: Color(0x660EA5E9),
                                 blurRadius: 16,
                                 offset: Offset(0, 4),
-                              )
+                              ),
                             ]
                           : [],
                     ),
@@ -81,7 +86,9 @@ class MapLayerChips extends StatelessWidget {
                           layers[index]['name'] as String,
                           style: GoogleFonts.inter(
                             fontSize: 14,
-                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: isActive
+                                ? FontWeight.w600
+                                : FontWeight.w500,
                             color: isActive
                                 ? Colors.white
                                 : Colors.white.withValues(alpha: 0.7),

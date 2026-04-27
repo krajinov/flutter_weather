@@ -9,6 +9,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/services/nominatim_service.dart';
 import '../../home/providers/location_provider.dart';
 import '../../home/providers/weather_provider.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../widgets/layer_toggles.dart';
 import '../widgets/map_overlay_widgets.dart';
 import '../widgets/bottom_weather_sheet.dart';
@@ -60,15 +61,36 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _onSuggestionSelected(PlaceSuggestion suggestion) {
     final newPoint = LatLng(suggestion.latitude, suggestion.longitude);
     ref.read(selectedLocationProvider.notifier).updateLocation(newPoint);
+    ref
+        .read(appSettingsProvider.notifier)
+        .setSelectedLocation(
+          placeName: suggestion.displayName.split(',').first.trim(),
+          latitude: suggestion.latitude,
+          longitude: suggestion.longitude,
+        );
     setState(() => _pendingLocation = null);
     _mapController.move(newPoint, 12.0);
   }
 
-  void _commitPendingLocation() {
+  Future<void> _commitPendingLocation() async {
     final pendingLocation = _pendingLocation;
     if (pendingLocation == null) return;
 
     ref.read(selectedLocationProvider.notifier).updateLocation(pendingLocation);
+    final city = await ref
+        .read(locationServiceProvider)
+        .getCityFromCoordinates(
+          pendingLocation.latitude,
+          pendingLocation.longitude,
+        );
+    await ref
+        .read(appSettingsProvider.notifier)
+        .setSelectedLocation(
+          placeName: city,
+          latitude: pendingLocation.latitude,
+          longitude: pendingLocation.longitude,
+        );
+    if (!mounted) return;
     setState(() => _pendingLocation = null);
   }
 
@@ -129,7 +151,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Widget build(BuildContext context) {
     final weatherAsyncValue = ref.watch(weatherProvider);
     final locationAsyncValue = ref.watch(locationProvider);
-    final selectedLocation = ref.watch(selectedLocationProvider);
+    final settings = ref.watch(appSettingsProvider).value;
+    final selectedLocation = settings != null && !settings.useCurrentLocation
+        ? settings.selectedLocation ?? ref.watch(selectedLocationProvider)
+        : null;
     final gpsPosition = locationAsyncValue.whenOrNull(
       data: (position) => position,
     );

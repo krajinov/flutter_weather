@@ -7,36 +7,38 @@ import '../../core/utils/preview_helper.dart';
 import '../../map/screens/map_screen.dart';
 import '../../alerts/screens/alerts_screen.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../providers/navigation_provider.dart';
 import '../providers/weather_provider.dart';
 import '../widgets/home_weather_overview.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(selectedTabProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    const screens = [
+      _HomeContent(),
+      MapScreen(),
+      AlertsScreen(),
+      SettingsScreen(),
+    ];
 
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _screens = const [
-    _HomeContent(),
-    MapScreen(),
-    AlertsScreen(),
-    SettingsScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: IndexedStack(index: currentIndex, children: screens),
       bottomNavigationBar: Container(
         height: 88,
-        decoration: const BoxDecoration(
-          color: AppColors.navBarColor,
-          border: Border(top: BorderSide(color: Color(0xFF243447), width: 1)),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.navBarColor : Colors.white,
+          border: Border(
+            top: BorderSide(
+              color: isDark ? const Color(0xFF243447) : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+          ),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
@@ -52,8 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          currentIndex: currentIndex,
+          onTap: (index) =>
+              ref.read(selectedTabProvider.notifier).select(index),
           items: [
             BottomNavigationBarItem(
               icon: const Icon(LucideIcons.home),
@@ -86,8 +89,10 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsyncValue = ref.watch(weatherProvider);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: const Color(0xFF071327),
+      color: isDark ? const Color(0xFF071327) : const Color(0xFFF5F7FB),
       child: SafeArea(
         child: weatherAsyncValue.when(
           data: (weatherData) {

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/utils/preview_helper.dart';
+import '../../settings/models/app_settings.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../models/weather_data.dart';
-import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class WeatherHeader extends StatelessWidget {
+class WeatherHeader extends ConsumerWidget {
   final WeatherData data;
 
   const WeatherHeader({super.key, required this.data});
@@ -30,8 +32,10 @@ class WeatherHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context).textTheme;
+    final settings =
+        ref.watch(appSettingsProvider).value ?? const AppSettings();
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,19 +44,14 @@ class WeatherHeader extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(data.city, style: theme.bodyMedium),
             Text(
-              data.city,
-              style: theme.bodyMedium,
-            ),
-            Text(
-              AppLocalizations.of(context)!.tempCelsius(data.temperature.toString()),
+              settings.formatTemperature(data.temperature),
               style: theme.displayLarge,
             ),
             Text(
               data.condition,
-              style: theme.bodyLarge?.copyWith(
-                color: const Color(0xFFCBD5E1),
-              ),
+              style: theme.bodyLarge?.copyWith(color: const Color(0xFFCBD5E1)),
             ),
           ],
         ),

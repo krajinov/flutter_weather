@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/preview_helper.dart';
+import '../../settings/models/app_settings.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../models/weather_data.dart';
 import 'glass_card.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class HourlyForecastList extends StatelessWidget {
+class HourlyForecastList extends ConsumerWidget {
   final List<HourlyForecast> forecasts;
 
   const HourlyForecastList({super.key, required this.forecasts});
@@ -36,15 +39,18 @@ class HourlyForecastList extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings =
+        ref.watch(appSettingsProvider).value ?? const AppSettings();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.hourlyForecast,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -57,16 +63,19 @@ class HourlyForecastList extends StatelessWidget {
               final forecast = forecasts[index];
               return GlassCard(
                 borderRadius: 12,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       forecast.time,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Icon(
@@ -76,10 +85,10 @@ class HourlyForecastList extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      AppLocalizations.of(context)!.tempCelsius(forecast.temperature.toString()),
+                      settings.formatTemperature(forecast.temperature),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),

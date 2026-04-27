@@ -16,9 +16,10 @@ class AlertsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsyncValue = ref.watch(weatherProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -31,7 +32,7 @@ class AlertsScreen extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -68,7 +69,7 @@ class AlertsScreen extends ConsumerWidget {
                         const SizedBox(height: 16),
                         Text(
                           AppLocalizations.of(context)!.errorLoadingAlerts,
-                          style: const TextStyle(color: AppColors.textPrimary),
+                          style: TextStyle(color: theme.colorScheme.primary),
                         ),
                       ],
                     ),
