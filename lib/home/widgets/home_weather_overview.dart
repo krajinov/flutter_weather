@@ -393,7 +393,7 @@ class _HourlyStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 166,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -401,45 +401,125 @@ class _HourlyStrip extends StatelessWidget {
         itemBuilder: (context, index) {
           final hour = forecasts[index];
           return Container(
-            width: 70,
+            width: 122,
             margin: EdgeInsets.only(
               right: index < forecasts.length - 1 ? 12 : 0,
             ),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: colors.cardColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: colors.borderColor),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  hour.time,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: colors.textSecondary,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hour.time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _weatherIconForDescriptor(hour.iconDescriptor),
+                      color: colors.accent,
+                      size: 18,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Icon(
-                  _weatherIconForDescriptor(hour.iconDescriptor),
-                  color: colors.textPrimary,
-                  size: 20,
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   settings.formatTemperature(hour.temperature),
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 22,
+                    height: 1,
                     fontWeight: FontWeight.w700,
                     color: colors.textPrimary,
                   ),
+                ),
+                const Spacer(),
+                _HourlyMetricRow(
+                  icon: LucideIcons.wind,
+                  label: 'Wind',
+                  value:
+                      '${hour.windSpeedKilometersPerHour.toStringAsFixed(0)} km/h',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.cloudRain,
+                  label: 'Rain',
+                  value: '${(hour.pop * 100).round()}%',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.droplets,
+                  label: 'Humid',
+                  value: '${hour.humidity}%',
+                  colors: colors,
                 ),
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _HourlyMetricRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final _WeatherSurfaceColors colors;
+
+  const _HourlyMetricRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: colors.textMuted),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              height: 1,
+              fontWeight: FontWeight.w500,
+              color: colors.textMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            height: 1,
+            fontWeight: FontWeight.w700,
+            color: colors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }

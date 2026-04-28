@@ -125,12 +125,22 @@ class HourlyForecast {
   final String time;
   final int temperature;
   final String iconDescriptor; // e.g., 'sun', 'cloud', 'rain'
+  final double windSpeed;
+  final int windDirection;
+  final double pop; // Chance of precipitation (0 to 1)
+  final int humidity;
 
   HourlyForecast({
     required this.time,
     required this.temperature,
     required this.iconDescriptor,
+    required this.windSpeed,
+    required this.windDirection,
+    required this.pop,
+    required this.humidity,
   });
+
+  double get windSpeedKilometersPerHour => windSpeed * 3.6;
 
   factory HourlyForecast.fromJson(
     Map<String, dynamic> json,
@@ -146,6 +156,10 @@ class HourlyForecast {
       time: timeStr,
       temperature: (json['temp'] as num).round(),
       iconDescriptor: _mapIconDescriptor(json['weather'][0]['main']),
+      windSpeed: (json['wind_speed'] as num?)?.toDouble() ?? 0.0,
+      windDirection: (json['wind_deg'] as num?)?.round() ?? 0,
+      pop: (json['pop'] as num?)?.toDouble() ?? 0.0,
+      humidity: (json['humidity'] as num?)?.round() ?? 0,
     );
   }
 }

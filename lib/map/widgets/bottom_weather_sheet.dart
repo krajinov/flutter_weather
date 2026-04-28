@@ -85,9 +85,7 @@ class PremiumWeatherSheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(
-                              context,
-                            )!.next3Days, // or 7 days
+                            AppLocalizations.of(context)!.next3Days,
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -251,7 +249,7 @@ class PremiumWeatherSheet extends ConsumerWidget {
     _SheetColors colors,
   ) {
     return SizedBox(
-      height: 100,
+      height: 166,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -262,39 +260,69 @@ class PremiumWeatherSheet extends ConsumerWidget {
         itemBuilder: (context, index) {
           final hour = weatherData.hourly[index];
           return Container(
-            width: 70,
+            width: 122,
             margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: colors.cardColor,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: colors.borderColor),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  hour.time,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: colors.textSecondary,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hour.time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _weatherIconForDescriptor(hour.iconDescriptor),
+                      color: colors.accent,
+                      size: 18,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Icon(
-                  hour.iconDescriptor == 'sun'
-                      ? LucideIcons.sun
-                      : LucideIcons.cloud,
-                  color: colors.textPrimary,
-                  size: 20,
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
                   settings.formatTemperature(hour.temperature),
                   style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
                     color: colors.textPrimary,
                   ),
+                ),
+                const Spacer(),
+                _HourlyMetricRow(
+                  icon: LucideIcons.wind,
+                  label: 'Wind',
+                  value:
+                      '${hour.windSpeedKilometersPerHour.toStringAsFixed(0)} km/h',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.cloudRain,
+                  label: 'Rain',
+                  value: '${(hour.pop * 100).round()}%',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.droplets,
+                  label: 'Humid',
+                  value: '${hour.humidity}%',
+                  colors: colors,
                 ),
               ],
             ),
@@ -357,6 +385,54 @@ class PremiumWeatherSheet extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HourlyMetricRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final _SheetColors colors;
+
+  const _HourlyMetricRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: colors.textMuted),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              height: 1,
+              fontWeight: FontWeight.w500,
+              color: colors.textMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            height: 1,
+            fontWeight: FontWeight.w700,
+            color: colors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -476,5 +552,26 @@ class _SheetColors {
       handleColor: Color(0xFFCBD5E1),
       shadowColor: Color(0x1A0F172A),
     );
+  }
+}
+
+IconData _weatherIconForDescriptor(String descriptor) {
+  switch (descriptor.toLowerCase()) {
+    case 'sun':
+      return LucideIcons.sun;
+    case 'cloud-sun':
+      return LucideIcons.cloudSun;
+    case 'rain':
+    case 'cloud-rain':
+      return LucideIcons.cloudRain;
+    case 'lightning':
+      return LucideIcons.cloudLightning;
+    case 'snow':
+      return LucideIcons.cloudSnow;
+    case 'moon':
+      return LucideIcons.moon;
+    case 'cloud':
+    default:
+      return LucideIcons.cloud;
   }
 }

@@ -29,7 +29,7 @@
   "humidity": "Humidity",
   "windSpeed": "Wind Speed",
   "hourlyForecast": "Hourly Forecast",
-  "next3Days": "Next 3 Days",
+  "next3Days": "7-day forecast",
   "rain": "Rain",
   "temperature": "Temperature",
   "wind": "Wind",

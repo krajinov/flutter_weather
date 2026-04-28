@@ -20,15 +20,9 @@ class HomeScreen extends ConsumerWidget {
     final currentIndex = ref.watch(selectedTabProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    const screens = [
-      _HomeContent(),
-      MapScreen(),
-      AlertsScreen(),
-      SettingsScreen(),
-    ];
 
     return Scaffold(
-      body: IndexedStack(index: currentIndex, children: screens),
+      body: _LazyTabStack(index: currentIndex),
       bottomNavigationBar: Container(
         height: 88,
         decoration: BoxDecoration(
@@ -77,6 +71,47 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LazyTabStack extends StatefulWidget {
+  final int index;
+
+  const _LazyTabStack({required this.index});
+
+  @override
+  State<_LazyTabStack> createState() => _LazyTabStackState();
+}
+
+class _LazyTabStackState extends State<_LazyTabStack> {
+  final Set<int> _loadedIndexes = {SelectedTabController.home};
+
+  static const _screens = [
+    _HomeContent(),
+    MapScreen(),
+    AlertsScreen(),
+    SettingsScreen(),
+  ];
+
+  @override
+  void didUpdateWidget(covariant _LazyTabStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _loadedIndexes.add(widget.index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _loadedIndexes.add(widget.index);
+
+    return IndexedStack(
+      index: widget.index,
+      children: List.generate(_screens.length, (index) {
+        if (_loadedIndexes.contains(index)) {
+          return _screens[index];
+        }
+        return const SizedBox.shrink();
+      }),
     );
   }
 }

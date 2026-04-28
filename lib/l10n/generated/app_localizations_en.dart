@@ -71,7 +71,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hourlyForecast => 'Hourly Forecast';
 
   @override
-  String get next3Days => 'Next 3 Days';
+  String get next3Days => '7-day forecast';
 
   @override
   String get rain => 'Rain';
