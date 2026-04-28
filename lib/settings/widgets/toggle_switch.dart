@@ -9,6 +9,7 @@ class ToggleSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -17,7 +18,11 @@ class ToggleSwitch extends StatelessWidget {
         height: 26,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: value ? const Color(0xFF0EA5E9) : const Color(0xFF1E293B),
+          color: value
+              ? const Color(0xFF0EA5E9)
+              : isDark
+              ? const Color(0xFF1E293B)
+              : const Color(0xFFCBD5E1),
           borderRadius: BorderRadius.circular(13),
         ),
         alignment: value ? Alignment.centerRight : Alignment.centerLeft,

@@ -1,32 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/nominatim_service.dart';
+import '../providers/settings_provider.dart';
+import '../widgets/city_picker_dialog.dart';
 import '../widgets/settings_section.dart';
 import '../widgets/toggle_switch.dart';
 import '../widgets/unit_selector.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 import '../../core/utils/preview_helper.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
+  Future<void> _pickCity(BuildContext context, WidgetRef ref) async {
+    final suggestion = await showDialog<PlaceSuggestion>(
+      context: context,
+      builder: (_) => const CityPickerDialog(),
+    );
+    if (suggestion == null) return;
 
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool _currentLocation = true;
-  bool _isCelsius = true;
-  bool _rainAlerts = true;
-  bool _severeAlerts = true;
-  bool _darkMode = true;
+    await ref
+        .read(appSettingsProvider.notifier)
+        .setSelectedLocation(
+          placeName: suggestion.displayName.split(',').first.trim(),
+          latitude: suggestion.latitude,
+          longitude: suggestion.longitude,
+        );
+  }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(appSettingsProvider);
+    final settings = settingsAsync.value;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (settings == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.statusIconActive),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -39,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -51,8 +73,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: LucideIcons.mapPin,
                     label: AppLocalizations.of(context)!.currentLocation,
                     trailing: ToggleSwitch(
-                      value: _currentLocation,
-                      onChanged: (v) => setState(() => _currentLocation = v),
+                      value: settings.useCurrentLocation,
+                      onChanged: (value) async {
+                        if (!value && !settings.hasSelectedLocation) {
+                          await _pickCity(context, ref);
+                          return;
+                        }
+                        await ref
+                            .read(appSettingsProvider.notifier)
+                            .setUseCurrentLocation(value);
+                      },
                     ),
                   ),
                   const SettingsDivider(),
@@ -64,7 +94,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       size: 16,
                       color: AppColors.textSecondary,
                     ),
-                    onTap: () {},
+                    onTap: () => _pickCity(context, ref),
                   ),
                 ],
               ),
@@ -77,8 +107,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: LucideIcons.thermometer,
                     label: AppLocalizations.of(context)!.temperatureUnit,
                     trailing: UnitSelector(
-                      isCelsius: _isCelsius,
-                      onChanged: (v) => setState(() => _isCelsius = v),
+                      isCelsius: settings.isCelsius,
+                      onChanged: (isCelsius) => ref
+                          .read(appSettingsProvider.notifier)
+                          .setTemperatureUnit(isCelsius: isCelsius),
                     ),
                   ),
                 ],
@@ -92,8 +124,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: LucideIcons.cloudRain,
                     label: AppLocalizations.of(context)!.rainAlerts,
                     trailing: ToggleSwitch(
-                      value: _rainAlerts,
-                      onChanged: (v) => setState(() => _rainAlerts = v),
+                      value: settings.rainAlertsEnabled,
+                      onChanged: (value) => ref
+                          .read(appSettingsProvider.notifier)
+                          .setRainAlertsEnabled(value),
                     ),
                   ),
                   const SettingsDivider(),
@@ -101,8 +135,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: LucideIcons.alertTriangle,
                     label: AppLocalizations.of(context)!.severeWeatherAlerts,
                     trailing: ToggleSwitch(
-                      value: _severeAlerts,
-                      onChanged: (v) => setState(() => _severeAlerts = v),
+                      value: settings.severeAlertsEnabled,
+                      onChanged: (value) => ref
+                          .read(appSettingsProvider.notifier)
+                          .setSevereAlertsEnabled(value),
                     ),
                   ),
                 ],
@@ -113,11 +149,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsSection(
                 children: [
                   SettingsRow(
-                    icon: LucideIcons.moon,
+                    icon: isDark ? LucideIcons.moon : LucideIcons.sun,
                     label: AppLocalizations.of(context)!.darkMode,
                     trailing: ToggleSwitch(
-                      value: _darkMode,
-                      onChanged: (v) => setState(() => _darkMode = v),
+                      value: settings.darkMode,
+                      onChanged: (value) => ref
+                          .read(appSettingsProvider.notifier)
+                          .setDarkMode(value),
                     ),
                   ),
                 ],

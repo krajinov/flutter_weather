@@ -1,12 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../home/models/weather_data.dart';
+import '../../settings/models/app_settings.dart';
+import '../../settings/providers/settings_provider.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class PremiumWeatherSheet extends StatelessWidget {
+class PremiumWeatherSheet extends ConsumerWidget {
   final WeatherData weatherData;
   final DraggableScrollableController? controller;
 
@@ -17,7 +20,11 @@ class PremiumWeatherSheet extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings =
+        ref.watch(appSettingsProvider).value ?? const AppSettings();
+    final colors = _SheetColors.of(context);
+
     return DraggableScrollableSheet(
       controller: controller,
       initialChildSize: 0.15,
@@ -32,14 +39,14 @@ class PremiumWeatherSheet extends StatelessWidget {
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xB80D1E30),
+                color: colors.sheetColor,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(32),
                 ),
-                border: Border.all(color: const Color(0x337FA5C8)),
-                boxShadow: const [
+                border: Border.all(color: colors.borderColor),
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x73000000),
+                    color: colors.shadowColor,
                     blurRadius: 30,
                     offset: Offset(0, -10),
                   ),
@@ -49,7 +56,9 @@ class PremiumWeatherSheet extends StatelessWidget {
                 controller: scrollController,
                 slivers: [
                   // Drag handle & Collapsed Header
-                  SliverToBoxAdapter(child: _buildHeader(context)),
+                  SliverToBoxAdapter(
+                    child: _buildHeader(context, settings, colors),
+                  ),
 
                   // Half Expanded: Quick Insights Grid
                   SliverPadding(
@@ -59,12 +68,14 @@ class PremiumWeatherSheet extends StatelessWidget {
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
                       childAspectRatio: 1.9,
-                      children: _buildInsightCards(context),
+                      children: _buildInsightCards(context, settings, colors),
                     ),
                   ),
 
                   // Half Expanded: Mini Hourly Forecast (Next 6h)
-                  SliverToBoxAdapter(child: _buildMiniHourly(context)),
+                  SliverToBoxAdapter(
+                    child: _buildMiniHourly(context, settings, colors),
+                  ),
 
                   // Full Expanded: 7-day forecast
                   SliverToBoxAdapter(
@@ -74,19 +85,24 @@ class PremiumWeatherSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(
-                              context,
-                            )!.next3Days, // or 7 days
+                            AppLocalizations.of(context)!.next3Days,
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 16),
                           ...weatherData.daily
                               .take(7)
-                              .map((d) => _buildDailyRow(context, d)),
+                              .map(
+                                (d) => _buildDailyRow(
+                                  context,
+                                  d,
+                                  settings,
+                                  colors,
+                                ),
+                              ),
                         ],
                       ),
                     ),
@@ -100,7 +116,11 @@ class PremiumWeatherSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(
+    BuildContext context,
+    AppSettings settings,
+    _SheetColors colors,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -110,7 +130,7 @@ class PremiumWeatherSheet extends StatelessWidget {
           width: 40,
           height: 4,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.3),
+            color: colors.handleColor,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -124,14 +144,14 @@ class PremiumWeatherSheet extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0x337CC4FF),
+                  color: colors.iconBackground,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   weatherData.condition == 'Sunny'
                       ? LucideIcons.sun
                       : LucideIcons.cloud,
-                  color: const Color(0xFF7CC4FF),
+                  color: colors.accent,
                   size: 24,
                 ),
               ),
@@ -146,7 +166,7 @@ class PremiumWeatherSheet extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
@@ -154,7 +174,7 @@ class PremiumWeatherSheet extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: const Color(0xFFC4D5E4),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -162,13 +182,11 @@ class PremiumWeatherSheet extends StatelessWidget {
               ),
               // Temp
               Text(
-                AppLocalizations.of(
-                  context,
-                )!.tempCelsius(weatherData.temperature.toString()),
+                settings.formatTemperature(weatherData.temperature),
                 style: GoogleFonts.dmSans(
                   fontSize: 36,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: colors.textPrimary,
                 ),
               ),
             ],
@@ -178,46 +196,60 @@ class PremiumWeatherSheet extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildInsightCards(BuildContext context) {
+  List<Widget> _buildInsightCards(
+    BuildContext context,
+    AppSettings settings,
+    _SheetColors colors,
+  ) {
     final l10n = AppLocalizations.of(context)!;
     return [
       _InsightCard(
         icon: LucideIcons.thermometer,
         title: l10n.feelsLike,
-        value: l10n.tempCelsius(weatherData.feelsLike.toString()),
+        value: settings.formatTemperature(weatherData.feelsLike),
+        colors: colors,
       ),
       _InsightCard(
         icon: LucideIcons.wind,
         title: l10n.windSpeed,
         value:
             '${weatherData.windSpeedKilometersPerHour.toStringAsFixed(1)} km/h',
+        colors: colors,
       ),
       _InsightCard(
         icon: LucideIcons.droplets,
         title: l10n.humidity,
         value: '${weatherData.humidity}%',
+        colors: colors,
       ),
       _InsightCard(
         icon: LucideIcons.cloudRain,
         title: l10n.chanceOfRain,
         value: '${(weatherData.pop * 100).round()}%',
+        colors: colors,
       ),
       _InsightCard(
         icon: LucideIcons.sunDim,
         title: l10n.uvIndex,
         value: weatherData.uvi.toStringAsFixed(1),
+        colors: colors,
       ),
       _InsightCard(
         icon: LucideIcons.sunrise,
         title: l10n.sunrise,
         value: DateFormat('HH:mm').format(weatherData.sunrise),
+        colors: colors,
       ),
     ];
   }
 
-  Widget _buildMiniHourly(BuildContext context) {
+  Widget _buildMiniHourly(
+    BuildContext context,
+    AppSettings settings,
+    _SheetColors colors,
+  ) {
     return SizedBox(
-      height: 100,
+      height: 166,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -228,41 +260,69 @@ class PremiumWeatherSheet extends StatelessWidget {
         itemBuilder: (context, index) {
           final hour = weatherData.hourly[index];
           return Container(
-            width: 70,
+            width: 122,
             margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0x3313263A),
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0x337FA5C8)),
+              border: Border.all(color: colors.borderColor),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hour.time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _weatherIconForDescriptor(hour.iconDescriptor),
+                      color: colors.accent,
+                      size: 18,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 Text(
-                  hour.time,
+                  settings.formatTemperature(hour.temperature),
                   style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: const Color(0xFFC4D5E4),
+                    fontSize: 22,
+                    height: 1,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Icon(
-                  hour.iconDescriptor == 'sun'
-                      ? LucideIcons.sun
-                      : LucideIcons.cloud,
-                  color: Colors.white,
-                  size: 20,
+                const Spacer(),
+                _HourlyMetricRow(
+                  icon: LucideIcons.wind,
+                  label: 'Wind',
+                  value:
+                      '${hour.windSpeedKilometersPerHour.toStringAsFixed(0)} km/h',
+                  colors: colors,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.tempCelsius(hour.temperature.toString()),
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.cloudRain,
+                  label: 'Rain',
+                  value: '${(hour.pop * 100).round()}%',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.droplets,
+                  label: 'Humid',
+                  value: '${hour.humidity}%',
+                  colors: colors,
                 ),
               ],
             ),
@@ -272,7 +332,12 @@ class PremiumWeatherSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyRow(BuildContext context, DailyForecast day) {
+  Widget _buildDailyRow(
+    BuildContext context,
+    DailyForecast day,
+    AppSettings settings,
+    _SheetColors colors,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -284,14 +349,14 @@ class PremiumWeatherSheet extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFFC4D5E4),
+                color: colors.textSecondary,
               ),
             ),
           ),
           const SizedBox(width: 16),
           Icon(
             day.iconDescriptor == 'sun' ? LucideIcons.sun : LucideIcons.cloud,
-            color: Colors.white,
+            color: colors.textPrimary,
             size: 20,
           ),
           const SizedBox(width: 16),
@@ -300,23 +365,19 @@ class PremiumWeatherSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.tempCelsius(day.minTemp.toString()),
+                  settings.formatTemperature(day.minTemp),
                   style: GoogleFonts.inter(
                     fontSize: 16,
-                    color: const Color(0xFF7FA5C8),
+                    color: colors.textMuted,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.tempCelsius(day.maxTemp.toString()),
+                  settings.formatTemperature(day.maxTemp),
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -328,15 +389,65 @@ class PremiumWeatherSheet extends StatelessWidget {
   }
 }
 
+class _HourlyMetricRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final _SheetColors colors;
+
+  const _HourlyMetricRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: colors.textMuted),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              height: 1,
+              fontWeight: FontWeight.w500,
+              color: colors.textMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            height: 1,
+            fontWeight: FontWeight.w700,
+            color: colors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _InsightCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
+  final _SheetColors colors;
 
   const _InsightCard({
     required this.icon,
     required this.title,
     required this.value,
+    required this.colors,
   });
 
   @override
@@ -344,9 +455,9 @@ class _InsightCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0x3313263A),
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0x337FA5C8)),
+        border: Border.all(color: colors.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,17 +465,19 @@ class _InsightCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: const Color(0xFF7CC4FF)),
+              Icon(icon, size: 16, color: colors.accent),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  height: 1.1,
-                  color: const Color(0xFF9FB4C8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    height: 1.1,
+                    color: colors.textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -374,7 +487,7 @@ class _InsightCard extends StatelessWidget {
               fontSize: 17,
               fontWeight: FontWeight.bold,
               height: 1.1,
-              color: Colors.white,
+              color: colors.textPrimary,
             ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -382,5 +495,83 @@ class _InsightCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _SheetColors {
+  final Color sheetColor;
+  final Color cardColor;
+  final Color borderColor;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color accent;
+  final Color iconBackground;
+  final Color handleColor;
+  final Color shadowColor;
+
+  const _SheetColors({
+    required this.sheetColor,
+    required this.cardColor,
+    required this.borderColor,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.accent,
+    required this.iconBackground,
+    required this.handleColor,
+    required this.shadowColor,
+  });
+
+  factory _SheetColors.of(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (isDark) {
+      return const _SheetColors(
+        sheetColor: Color(0xB80D1E30),
+        cardColor: Color(0x3313263A),
+        borderColor: Color(0x337FA5C8),
+        textPrimary: Colors.white,
+        textSecondary: Color(0xFFC4D5E4),
+        textMuted: Color(0xFF9FB4C8),
+        accent: Color(0xFF7CC4FF),
+        iconBackground: Color(0x337CC4FF),
+        handleColor: Color(0x4DFFFFFF),
+        shadowColor: Color(0x73000000),
+      );
+    }
+
+    return const _SheetColors(
+      sheetColor: Colors.white,
+      cardColor: Color(0xFFF1F5F9),
+      borderColor: Color(0xFFE2E8F0),
+      textPrimary: Color(0xFF0F172A),
+      textSecondary: Color(0xFF475569),
+      textMuted: Color(0xFF64748B),
+      accent: Color(0xFF0284C7),
+      iconBackground: Color(0xFFE0F2FE),
+      handleColor: Color(0xFFCBD5E1),
+      shadowColor: Color(0x1A0F172A),
+    );
+  }
+}
+
+IconData _weatherIconForDescriptor(String descriptor) {
+  switch (descriptor.toLowerCase()) {
+    case 'sun':
+      return LucideIcons.sun;
+    case 'cloud-sun':
+      return LucideIcons.cloudSun;
+    case 'rain':
+    case 'cloud-rain':
+      return LucideIcons.cloudRain;
+    case 'lightning':
+      return LucideIcons.cloudLightning;
+    case 'snow':
+      return LucideIcons.cloudSnow;
+    case 'moon':
+      return LucideIcons.moon;
+    case 'cloud':
+    default:
+      return LucideIcons.cloud;
   }
 }

@@ -25,6 +25,9 @@ void main() {
         {
           'dt': DateTime.utc(2099, 1, 2, 12).millisecondsSinceEpoch ~/ 1000,
           'temp': 13.0,
+          'humidity': 68,
+          'wind_speed': 4.5,
+          'wind_deg': 210,
           'pop': 0.2,
           'weather': [
             {'main': 'Clear'},
@@ -63,6 +66,13 @@ void main() {
     expect(weather.sunset.hour, 18);
     expect(weather.sunset.minute, 45);
     expect(weather.hourly.first.time, '14:00');
+    expect(weather.hourly.first.humidity, 68);
+    expect(weather.hourly.first.windDirection, 210);
+    expect(weather.hourly.first.pop, 0.2);
+    expect(
+      weather.hourly.first.windSpeedKilometersPerHour,
+      closeTo(16.2, 0.001),
+    );
     expect(
       weather.daily.first.dayName,
       DateFormat(

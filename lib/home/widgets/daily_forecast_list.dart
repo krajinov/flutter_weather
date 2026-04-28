@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/utils/mock_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/preview_helper.dart';
+import '../../settings/models/app_settings.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../models/weather_data.dart';
 import 'glass_card.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class DailyForecastList extends StatelessWidget {
+class DailyForecastList extends ConsumerWidget {
   final List<DailyForecast> forecasts;
 
   const DailyForecastList({super.key, required this.forecasts});
@@ -34,15 +37,18 @@ class DailyForecastList extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings =
+        ref.watch(appSettingsProvider).value ?? const AppSettings();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.of(context)!.next3Days,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         ListView.separated(
@@ -63,10 +69,10 @@ class DailyForecastList extends StatelessWidget {
                     child: Text(
                       forecast.dayName,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFFE2E8F0),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13,
-                          ),
+                        color: const Color(0xFFE2E8F0),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                   Icon(
@@ -76,12 +82,12 @@ class DailyForecastList extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '${AppLocalizations.of(context)!.tempCelsius(forecast.maxTemp.toString())} / ${AppLocalizations.of(context)!.tempCelsius(forecast.minTemp.toString())}',
+                    '${settings.formatTemperature(forecast.maxTemp)} / ${settings.formatTemperature(forecast.minTemp)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFFE2E8F0),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
+                      color: const Color(0xFFE2E8F0),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),

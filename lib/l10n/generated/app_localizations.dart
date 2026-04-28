@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
-  /// **'SETTINGS'**
+  /// **'Settings'**
   String get settings;
 
   /// No description provided for @retry.
@@ -217,7 +217,7 @@ abstract class AppLocalizations {
   /// No description provided for @next3Days.
   ///
   /// In en, this message translates to:
-  /// **'Next 3 Days'**
+  /// **'7-day forecast'**
   String get next3Days;
 
   /// No description provided for @rain.

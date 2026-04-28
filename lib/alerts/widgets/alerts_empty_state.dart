@@ -8,6 +8,14 @@ class AlertsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconBackground = isDark
+        ? const Color(0xFF1F2F45)
+        : const Color(0xFFFEF3C7);
+    final textColor = isDark
+        ? const Color(0xFFC4D5E4)
+        : Theme.of(context).colorScheme.primary;
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -16,7 +24,7 @@ class AlertsEmptyState extends StatelessWidget {
             width: 54,
             height: 54,
             decoration: BoxDecoration(
-              color: const Color(0xFF1F2F45),
+              color: iconBackground,
               borderRadius: BorderRadius.circular(27),
             ),
             child: const Center(
@@ -29,7 +37,7 @@ class AlertsEmptyState extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFFC4D5E4),
+              color: textColor,
             ),
           ),
         ],

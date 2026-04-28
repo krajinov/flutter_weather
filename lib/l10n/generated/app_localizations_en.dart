@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alerts => 'ALERTS';
 
   @override
-  String get settings => 'SETTINGS';
+  String get settings => 'Settings';
 
   @override
   String get retry => 'Retry';
@@ -71,7 +71,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hourlyForecast => 'Hourly Forecast';
 
   @override
-  String get next3Days => 'Next 3 Days';
+  String get next3Days => '7-day forecast';
 
   @override
   String get rain => 'Rain';

@@ -1,32 +1,39 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import '../../settings/models/app_settings.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../models/weather_data.dart';
 import 'package:flutter_weather/l10n/generated/app_localizations.dart';
 
-class HomeWeatherOverview extends StatelessWidget {
+class HomeWeatherOverview extends ConsumerWidget {
   final WeatherData data;
 
   const HomeWeatherOverview({super.key, required this.data});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final settings =
+        ref.watch(appSettingsProvider).value ?? const AppSettings();
+    final colors = _WeatherSurfaceColors.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _HomeTopBar(data: data),
+          _HomeTopBar(data: data, colors: colors),
           const SizedBox(height: 20),
-          _CurrentWeatherHero(data: data),
+          _CurrentWeatherHero(data: data, settings: settings, colors: colors),
           const SizedBox(height: 18),
           _GlassSheet(
+            colors: colors,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -35,19 +42,31 @@ class HomeWeatherOverview extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 14),
-                _InsightGrid(data: data),
+                _InsightGrid(data: data, settings: settings, colors: colors),
                 const SizedBox(height: 22),
-                _SectionTitle(l10n.nextHours),
+                _SectionTitle(l10n.nextHours, colors: colors),
                 const SizedBox(height: 12),
-                _HourlyStrip(forecasts: data.hourly.take(8).toList()),
+                _HourlyStrip(
+                  forecasts: data.hourly.take(8).toList(),
+                  settings: settings,
+                  colors: colors,
+                ),
                 const SizedBox(height: 24),
-                _SectionTitle(l10n.next3Days),
+                _SectionTitle(l10n.next3Days, colors: colors),
                 const SizedBox(height: 12),
-                ...data.daily.take(7).map((day) => _DailyRow(day: day)),
+                ...data.daily
+                    .take(7)
+                    .map(
+                      (day) => _DailyRow(
+                        day: day,
+                        settings: settings,
+                        colors: colors,
+                      ),
+                    ),
               ],
             ),
           ),
@@ -59,8 +78,9 @@ class HomeWeatherOverview extends StatelessWidget {
 
 class _HomeTopBar extends StatelessWidget {
   final WeatherData data;
+  final _WeatherSurfaceColors colors;
 
-  const _HomeTopBar({required this.data});
+  const _HomeTopBar({required this.data, required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +97,7 @@ class _HomeTopBar extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -88,7 +108,7 @@ class _HomeTopBar extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFFC4D5E4),
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -98,7 +118,8 @@ class _HomeTopBar extends StatelessWidget {
         _IconCircle(
           icon: _weatherIconForCondition(data.condition),
           size: 22,
-          iconColor: const Color(0xFF7CC4FF),
+          iconColor: colors.accent,
+          colors: colors,
         ),
       ],
     );
@@ -107,8 +128,14 @@ class _HomeTopBar extends StatelessWidget {
 
 class _CurrentWeatherHero extends StatelessWidget {
   final WeatherData data;
+  final AppSettings settings;
+  final _WeatherSurfaceColors colors;
 
-  const _CurrentWeatherHero({required this.data});
+  const _CurrentWeatherHero({
+    required this.data,
+    required this.settings,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +144,16 @@ class _CurrentWeatherHero extends StatelessWidget {
     return _BlurredPanel(
       radius: 30,
       padding: const EdgeInsets.all(20),
-      color: const Color(0x990D1E30),
+      colors: colors,
+      color: colors.panelColor,
       child: Row(
         children: [
           _IconCircle(
             icon: _weatherIconForCondition(data.condition),
             size: 32,
             diameter: 64,
-            iconColor: const Color(0xFF7CC4FF),
+            iconColor: colors.accent,
+            colors: colors,
           ),
           const SizedBox(width: 18),
           Expanded(
@@ -138,20 +167,20 @@ class _CurrentWeatherHero extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   l10n.feelsLikeValue(
-                    l10n.tempCelsius(data.feelsLike.toString()),
+                    settings.formatTemperature(data.feelsLike),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFFC4D5E4),
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -162,7 +191,7 @@ class _CurrentWeatherHero extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: const Color(0xFF9FB4C8),
+                    color: colors.textMuted,
                   ),
                 ),
               ],
@@ -170,12 +199,12 @@ class _CurrentWeatherHero extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Text(
-            l10n.tempCelsius(data.temperature.toString()),
+            settings.formatTemperature(data.temperature),
             style: GoogleFonts.dmSans(
               fontSize: 44,
               height: 1,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: colors.textPrimary,
             ),
           ),
         ],
@@ -186,22 +215,24 @@ class _CurrentWeatherHero extends StatelessWidget {
 
 class _GlassSheet extends StatelessWidget {
   final Widget child;
+  final _WeatherSurfaceColors colors;
 
-  const _GlassSheet({required this.child});
+  const _GlassSheet({required this.child, required this.colors});
 
   @override
   Widget build(BuildContext context) {
     return _BlurredPanel(
       radius: 32,
       padding: const EdgeInsets.all(20),
-      color: const Color(0xB80D1E30),
+      colors: colors,
+      color: colors.sheetColor,
       child: Column(
         children: [
           Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: colors.handleColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -215,8 +246,14 @@ class _GlassSheet extends StatelessWidget {
 
 class _InsightGrid extends StatelessWidget {
   final WeatherData data;
+  final AppSettings settings;
+  final _WeatherSurfaceColors colors;
 
-  const _InsightGrid({required this.data});
+  const _InsightGrid({
+    required this.data,
+    required this.settings,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +304,8 @@ class _InsightGrid extends StatelessWidget {
             crossAxisSpacing: 12,
             mainAxisExtent: 88,
           ),
-          itemBuilder: (context, index) => _InsightCard(data: cards[index]),
+          itemBuilder: (context, index) =>
+              _InsightCard(data: cards[index], colors: colors),
         );
       },
     );
@@ -288,17 +326,18 @@ class _InsightCardData {
 
 class _InsightCard extends StatelessWidget {
   final _InsightCardData data;
+  final _WeatherSurfaceColors colors;
 
-  const _InsightCard({required this.data});
+  const _InsightCard({required this.data, required this.colors});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0x3313263A),
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0x337FA5C8)),
+        border: Border.all(color: colors.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,7 +345,7 @@ class _InsightCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(data.icon, size: 16, color: const Color(0xFF7CC4FF)),
+              Icon(data.icon, size: 16, color: colors.accent),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -317,7 +356,7 @@ class _InsightCard extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     height: 1.1,
-                    color: const Color(0xFF9FB4C8),
+                    color: colors.textMuted,
                   ),
                 ),
               ),
@@ -331,7 +370,7 @@ class _InsightCard extends StatelessWidget {
               fontSize: 17,
               fontWeight: FontWeight.w700,
               height: 1.1,
-              color: Colors.white,
+              color: colors.textPrimary,
             ),
           ),
         ],
@@ -342,13 +381,19 @@ class _InsightCard extends StatelessWidget {
 
 class _HourlyStrip extends StatelessWidget {
   final List<HourlyForecast> forecasts;
+  final AppSettings settings;
+  final _WeatherSurfaceColors colors;
 
-  const _HourlyStrip({required this.forecasts});
+  const _HourlyStrip({
+    required this.forecasts,
+    required this.settings,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100,
+      height: 166,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -356,41 +401,71 @@ class _HourlyStrip extends StatelessWidget {
         itemBuilder: (context, index) {
           final hour = forecasts[index];
           return Container(
-            width: 70,
+            width: 122,
             margin: EdgeInsets.only(
               right: index < forecasts.length - 1 ? 12 : 0,
             ),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0x3313263A),
+              color: colors.cardColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0x337FA5C8)),
+              border: Border.all(color: colors.borderColor),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  hour.time,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: const Color(0xFFC4D5E4),
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        hour.time,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      _weatherIconForDescriptor(hour.iconDescriptor),
+                      color: colors.accent,
+                      size: 18,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                Icon(
-                  _weatherIconForDescriptor(hour.iconDescriptor),
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.tempCelsius(hour.temperature.toString()),
+                  settings.formatTemperature(hour.temperature),
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 22,
+                    height: 1,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: colors.textPrimary,
                   ),
+                ),
+                const Spacer(),
+                _HourlyMetricRow(
+                  icon: LucideIcons.wind,
+                  label: 'Wind',
+                  value:
+                      '${hour.windSpeedKilometersPerHour.toStringAsFixed(0)} km/h',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.cloudRain,
+                  label: 'Rain',
+                  value: '${(hour.pop * 100).round()}%',
+                  colors: colors,
+                ),
+                const SizedBox(height: 7),
+                _HourlyMetricRow(
+                  icon: LucideIcons.droplets,
+                  label: 'Humid',
+                  value: '${hour.humidity}%',
+                  colors: colors,
                 ),
               ],
             ),
@@ -401,15 +476,67 @@ class _HourlyStrip extends StatelessWidget {
   }
 }
 
-class _DailyRow extends StatelessWidget {
-  final DailyForecast day;
+class _HourlyMetricRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final _WeatherSurfaceColors colors;
 
-  const _DailyRow({required this.day});
+  const _HourlyMetricRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.colors,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: colors.textMuted),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              height: 1,
+              fontWeight: FontWeight.w500,
+              color: colors.textMuted,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            height: 1,
+            fontWeight: FontWeight.w700,
+            color: colors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
+class _DailyRow extends StatelessWidget {
+  final DailyForecast day;
+  final AppSettings settings;
+  final _WeatherSurfaceColors colors;
+
+  const _DailyRow({
+    required this.day,
+    required this.settings,
+    required this.colors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -423,14 +550,14 @@ class _DailyRow extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFFC4D5E4),
+                color: colors.textSecondary,
               ),
             ),
           ),
           const SizedBox(width: 14),
           Icon(
             _weatherIconForDescriptor(day.iconDescriptor),
-            color: Colors.white,
+            color: colors.textPrimary,
             size: 20,
           ),
           const SizedBox(width: 14),
@@ -439,19 +566,19 @@ class _DailyRow extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  l10n.tempCelsius(day.minTemp.toString()),
+                  settings.formatTemperature(day.minTemp),
                   style: GoogleFonts.inter(
                     fontSize: 15,
-                    color: const Color(0xFF7FA5C8),
+                    color: colors.textMuted,
                   ),
                 ),
                 const SizedBox(width: 14),
                 Text(
-                  l10n.tempCelsius(day.maxTemp.toString()),
+                  settings.formatTemperature(day.maxTemp),
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -465,8 +592,9 @@ class _DailyRow extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String text;
+  final _WeatherSurfaceColors colors;
 
-  const _SectionTitle(this.text);
+  const _SectionTitle(this.text, {required this.colors});
 
   @override
   Widget build(BuildContext context) {
@@ -475,7 +603,7 @@ class _SectionTitle extends StatelessWidget {
       style: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: colors.textPrimary,
       ),
     );
   }
@@ -486,12 +614,14 @@ class _BlurredPanel extends StatelessWidget {
   final double radius;
   final EdgeInsets padding;
   final Color color;
+  final _WeatherSurfaceColors colors;
 
   const _BlurredPanel({
     required this.child,
     required this.radius,
     required this.padding,
     required this.color,
+    required this.colors,
   });
 
   @override
@@ -506,10 +636,10 @@ class _BlurredPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(radius),
-            border: Border.all(color: const Color(0x337FA5C8)),
-            boxShadow: const [
+            border: Border.all(color: colors.borderColor),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x59000000),
+                color: colors.shadowColor,
                 blurRadius: 28,
                 offset: Offset(0, 12),
               ),
@@ -527,12 +657,14 @@ class _IconCircle extends StatelessWidget {
   final double size;
   final double diameter;
   final Color iconColor;
+  final _WeatherSurfaceColors colors;
 
   const _IconCircle({
     required this.icon,
     required this.size,
     this.diameter = 48,
     required this.iconColor,
+    required this.colors,
   });
 
   @override
@@ -540,11 +672,72 @@ class _IconCircle extends StatelessWidget {
     return Container(
       width: diameter,
       height: diameter,
-      decoration: const BoxDecoration(
-        color: Color(0x337CC4FF),
+      decoration: BoxDecoration(
+        color: colors.iconBackground,
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: iconColor, size: size),
+    );
+  }
+}
+
+class _WeatherSurfaceColors {
+  final Color panelColor;
+  final Color sheetColor;
+  final Color cardColor;
+  final Color borderColor;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color accent;
+  final Color iconBackground;
+  final Color handleColor;
+  final Color shadowColor;
+
+  const _WeatherSurfaceColors({
+    required this.panelColor,
+    required this.sheetColor,
+    required this.cardColor,
+    required this.borderColor,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.accent,
+    required this.iconBackground,
+    required this.handleColor,
+    required this.shadowColor,
+  });
+
+  factory _WeatherSurfaceColors.of(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (isDark) {
+      return const _WeatherSurfaceColors(
+        panelColor: Color(0x990D1E30),
+        sheetColor: Color(0xB80D1E30),
+        cardColor: Color(0x3313263A),
+        borderColor: Color(0x337FA5C8),
+        textPrimary: Colors.white,
+        textSecondary: Color(0xFFC4D5E4),
+        textMuted: Color(0xFF9FB4C8),
+        accent: Color(0xFF7CC4FF),
+        iconBackground: Color(0x337CC4FF),
+        handleColor: Color(0x4DFFFFFF),
+        shadowColor: Color(0x59000000),
+      );
+    }
+
+    return const _WeatherSurfaceColors(
+      panelColor: Colors.white,
+      sheetColor: Colors.white,
+      cardColor: Color(0xFFF1F5F9),
+      borderColor: Color(0xFFE2E8F0),
+      textPrimary: Color(0xFF0F172A),
+      textSecondary: Color(0xFF475569),
+      textMuted: Color(0xFF64748B),
+      accent: Color(0xFF0284C7),
+      iconBackground: Color(0xFFE0F2FE),
+      handleColor: Color(0xFFCBD5E1),
+      shadowColor: Color(0x1A0F172A),
     );
   }
 }

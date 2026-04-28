@@ -1,0 +1,231 @@
+Flutter Weather Dashboard - Pencil Design Proposals
+File: fw-dashboard-new.pen
+Canvas: mobile dashboard, 390 x 844
+Goal: redesign the Home/Dashboard page so hourly weather exposes more than temperature:
+wind, precipitation, humidity, and room for UV/sun data without making the screen feel crowded.
+
+Current app context
+- Existing weather data supports: temperature, feels like, humidity, wind speed/direction,
+  UV index, sunrise, sunset, chance of precipitation, hourly forecast, daily forecast.
+- Current visual language: dark weather surface, glass panels, cyan accent icons, bottom nav.
+- Existing l10n labels include: Key conditions, Next hours, Wind Speed, Humidity,
+  Chance of Rain, UV Index, Sunrise, Sunset.
+
+Shared visual tokens
+- Background: #071327 base, subtle depth toward #0D1E30.
+- Primary glass: #0D1E30 at 72% opacity, blur 20, border #7FA5C8 at 20%.
+- Secondary glass: #13263A at 20% opacity, border #7FA5C8 at 20%.
+- Accent: #7CC4FF for selected states, icons, dividers, trend points.
+- Primary text: #FFFFFF. Secondary text: #C4D5E4. Muted text: #9FB4C8.
+- Main radius: 28-32 for hero/sheet panels, 14-20 for metric tiles.
+- Icons: Lucide line icons, 16-24px.
+- Spacing: 20px screen gutters, 12px grid gaps, 16-20px panel padding.
+
+Hourly detail data model direction
+- Extend HourlyForecast UI data to display:
+  time, weather icon, temperature, wind speed, precipitation chance, humidity.
+- Optional later: wind direction, UV, pressure, visibility, dew point.
+- Keep the first release focused on hourly wind, precipitation, and humidity.
+
+----------------------------------------------------------------------------
+DESIGN 1 - "Hourly Detail Rail"
+Best when the top-level dashboard should stay familiar but each hourly card becomes more useful.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  | Sarajevo                              (search) |
+  | Cloudy today                                   |
+  |                                                |
+  | .--------------------------------------------. |
+  | | (sun)  23 C                    Feels 24 C  | |
+  | |        Low rain risk      Wind 18.0 km/h   | |
+  | '--------------------------------------------' |
+  |                                                |
+  | .---------------- key conditions ------------. |
+  | | .----------. .----------. .----------.     | |
+  | | | Rain 10% | | Wind 18 | | Humid 56%|     | |
+  | | '----------' '----------' '----------'     | |
+  | | .----------. .----------. .----------.     | |
+  | | | UV 5.2   | | Rise 06 | | Set 19   |     | |
+  | | '----------' '----------' '----------'     | |
+  | '--------------------------------------------' |
+  |                                                |
+  | Next hours                         temp/wind   |
+  | .--------. .--------. .--------. .--------.    |
+  | | 13:00  | | 14:00  | | 15:00  | | 16:00  |    |
+  | |  sun   | | cloud  | | rain   | | cloud  |    |
+  | | 23 C   | | 24 C   | | 22 C   | | 21 C   |    |
+  | | wind 8 | | wind 9 | | wind 12| | wind 11|    |
+  | | rain 5 | | rain 8 | | rain 42| | rain 20|    |
+  | | hum 56 | | hum 58 | | hum 65 | | hum 67 |    |
+  | '--------' '--------' '--------' '--------'    |
+  |                                                |
+  | 7-day forecast                                 |
+  | Today     sun            24 C / 15 C           |
+  | Tue       cloud          21 C / 13 C           |
+  |                                                |
+  | HOME        MAP        ALERTS      Settings    |
+  '------------------------------------------------'
+
+Layout notes
+- Keep the current dashboard hierarchy: top location, hero weather, key conditions,
+  hourly forecast, daily forecast.
+- Replace the compact hourly 70px cards with wider detail cards, about 112-124px wide.
+- Each hourly card has one primary value and three mini rows:
+  temperature, wind, precipitation, humidity.
+- Use short labels inside the hourly card: Wind, Rain, Humid.
+- Horizontal scroll is still the interaction, so the dashboard remains simple.
+- This option is the lowest-risk implementation because the page structure barely changes.
+
+Interaction notes
+- Tap an hourly detail card to open a bottom sheet with the full hour:
+  temperature, feels like, wind speed/direction, precipitation, humidity, UV if available.
+- A small segmented control above the rail can switch emphasis:
+  [All] [Temp] [Wind] [Rain] [Humidity].
+- Default view is All.
+
+Implementation direction
+- Extend HourlyForecast to carry pop, humidity, windSpeed, and optionally windDirection.
+- Update WeatherData.fromJson to parse those fields from each hourly item.
+- Replace _HourlyStrip card content with the richer mini rows.
+- Keep _InsightGrid as-is, but make it three columns on wider dashboard widths.
+
+----------------------------------------------------------------------------
+DESIGN 2 - "Metric Lanes"
+Best when the user wants to compare hourly temperature, wind, precipitation, and humidity quickly.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  | Sarajevo                              (locate) |
+  | Updated 13:04                                  |
+  |                                                |
+  |       23 C                                     |
+  |       Mostly sunny                             |
+  |                                                |
+  | .---------------- dashboard sheet -----------. |
+  | | Key conditions                             | |
+  | | [Rain 10%] [Wind 18 km/h] [Humidity 56%]  | |
+  | | [UV 5.2]   [Sunrise 06:15] [Sunset 19:45] | |
+  | |                                            | |
+  | | Hourly detail                              | |
+  | |       Now   14    15    16    17    18    | |
+  | | Temp  23    24    24    21    20    19    | |
+  | | Wind   8     9    12    11    10     7    | |
+  | | Rain   5     8    42    20    14    10    | |
+  | | Hum   56    58    65    67    70    72    | |
+  | |                                            | |
+  | | Daily forecast                             | |
+  | | Today    sun              24 C / 15 C      | |
+  | | Tue      cloud            21 C / 13 C      | |
+  | '--------------------------------------------' |
+  |                                                |
+  | HOME        MAP        ALERTS      Settings    |
+  '------------------------------------------------'
+
+Layout notes
+- The hourly section becomes a compact matrix instead of a row of cards.
+- Columns are hours. Rows are weather measures:
+  Temp, Wind, Rain, Humidity.
+- Freeze metric labels on the left and horizontally scroll the hour columns.
+- This is the densest way to show multi-hour, multi-metric weather without stacking cards.
+- Use icon labels on the left when possible:
+  thermometer, wind, cloud-rain, droplets.
+- Highlight the highest precipitation hour with cyan text or a subtle filled cell.
+
+Interaction notes
+- Horizontal scroll on the hourly matrix.
+- Tap a row label to emphasize that metric across all hours.
+- Tap a column/hour to select it; selected column gets a soft cyan border.
+- Selected hour updates a small "Focused hour" row above or below the matrix:
+  "15:00: 24 C, wind 12 km/h, rain 42%, humidity 65%".
+
+Implementation direction
+- Create a new HourlyMetricTable widget.
+- Use a horizontal SingleChildScrollView with fixed-width columns.
+- Keep the left label column outside the horizontal scroll so labels remain readable.
+- This design needs careful responsive sizing, but it scales best for comparison.
+
+----------------------------------------------------------------------------
+DESIGN 3 - "Forecast Tabs"
+Best when the dashboard should expose many hourly metrics without showing all of them at once.
+
+Pencil sketch
+
+  .------------------------------------------------.
+  | .--------------------------------------------. |
+  | | Sarajevo                         (pin)     | |
+  | | Mostly sunny today                         | |
+  | |                                            | |
+  | | 23 C                         Feels 24 C    | |
+  | | Wind 18 km/h       Rain 10%       Hum 56%  | |
+  | '--------------------------------------------' |
+  |                                                |
+  | [ Overview ] [ Wind ] [ Rain ] [ Humidity ]    |
+  |                                                |
+  | .--------------- selected metric ------------. |
+  | | Rain by hour                               | |
+  | |                                            | |
+  | |  45%          x                            | |
+  | |  30%       x  |  x                         | |
+  | |  15%    x  |  |  |  x  x                   | |
+  | |   0%  x |  |  |  |  |  |                   | |
+  | |      Now 14 15 16 17 18                   | |
+  | |                                            | |
+  | | Now 5%  14:00 8%  15:00 42%  16:00 20%   | |
+  | '--------------------------------------------' |
+  |                                                |
+  | .------------------ details ----------------.  |
+  | | Current hour                               |  |
+  | | Temperature 23 C     Wind 8 km/h           |  |
+  | | Precip 5%           Humidity 56%           |  |
+  | '--------------------------------------------' |
+  |                                                |
+  | 7-day forecast                                 |
+  | Today     sun            24 C / 15 C           |
+  |                                                |
+  | HOME        MAP        ALERTS      Settings    |
+  '------------------------------------------------'
+
+Layout notes
+- Keep the hero compact and put the dashboard behavior into tabs.
+- Tabs: Overview, Wind, Rain, Humidity.
+- Overview shows the familiar current conditions and small hourly cards.
+- Wind tab shows a wind-speed trend and optional direction markers.
+- Rain tab shows precipitation probability by hour.
+- Humidity tab shows humidity by hour.
+- Each tab has the same panel size, which prevents layout jumps.
+
+Interaction notes
+- Segmented tabs switch the selected metric.
+- The selected metric panel can be a simple bar/line chart in the first version.
+- Tap/drag over the chart to select an hour.
+- Details panel below always shows full data for the selected hour.
+
+Implementation direction
+- Add DashboardMetric enum: overview, wind, rain, humidity.
+- Build a HomeMetricTabs widget that mirrors map layer chip styling.
+- Add HourlyMetricChart for the selected metric.
+- Add SelectedHourDetails using the same four values:
+  temperature, wind, precipitation, humidity.
+- This design has the most future capacity for pressure, visibility, air quality, and dew point.
+
+----------------------------------------------------------------------------
+Recommendation
+Use Design 1 for the first implementation.
+
+Reasons
+- It answers the user need directly: every visible hourly card can show wind,
+  precipitation, and humidity.
+- It requires the smallest visual and navigation change.
+- It keeps the current dashboard rhythm and bottom navigation untouched.
+- The data model change is straightforward because OpenWeather hourly data already carries
+  pop, humidity, wind_speed, and wind_deg.
+
+Suggested implementation sequence
+1. Extend HourlyForecast with windSpeed, windDirection, pop, and humidity.
+2. Parse those fields in HourlyForecast.fromJson.
+3. Replace the current hourly strip cards with detail cards from Design 1.
+4. Add an optional metric filter after the richer hourly cards are stable.
+5. Consider Design 2 or 3 later if users need comparison or deeper weather tooling.

@@ -21,6 +21,7 @@ class SelectedLocationNotifier extends Notifier<LatLng?> {
   }
 }
 
-final selectedLocationProvider = NotifierProvider<SelectedLocationNotifier, LatLng?>(() {
-  return SelectedLocationNotifier();
-});
+final selectedLocationProvider =
+    NotifierProvider<SelectedLocationNotifier, LatLng?>(() {
+      return SelectedLocationNotifier();
+    });

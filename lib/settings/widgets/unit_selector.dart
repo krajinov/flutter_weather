@@ -6,16 +6,22 @@ class UnitSelector extends StatelessWidget {
   final bool isCelsius;
   final ValueChanged<bool> onChanged;
 
-  const UnitSelector({super.key, required this.isCelsius, required this.onChanged});
+  const UnitSelector({
+    super.key,
+    required this.isCelsius,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: 78,
       height: 30,
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: AppColors.cardColor,
+        color: isDark ? AppColors.cardColor : const Color(0xFFE2E8F0),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -26,7 +32,11 @@ class UnitSelector extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isCelsius ? AppColors.background : Colors.transparent,
+                  color: isCelsius
+                      ? isDark
+                            ? AppColors.background
+                            : Colors.white
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(13),
                 ),
                 alignment: Alignment.center,
@@ -36,7 +46,7 @@ class UnitSelector extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: isCelsius ? FontWeight.w600 : FontWeight.w500,
                     color: isCelsius
-                        ? AppColors.textPrimary
+                        ? theme.colorScheme.primary
                         : AppColors.textSecondary,
                   ),
                 ),
@@ -49,7 +59,11 @@ class UnitSelector extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: !isCelsius ? AppColors.background : Colors.transparent,
+                  color: !isCelsius
+                      ? isDark
+                            ? AppColors.background
+                            : Colors.white
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(13),
                 ),
                 alignment: Alignment.center,
@@ -59,7 +73,7 @@ class UnitSelector extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: !isCelsius ? FontWeight.w600 : FontWeight.w500,
                     color: !isCelsius
-                        ? AppColors.textPrimary
+                        ? theme.colorScheme.primary
                         : AppColors.textSecondary,
                   ),
                 ),
